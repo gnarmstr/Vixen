@@ -427,6 +427,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "HighestValue", "Modules\LayerCombiningFilter\HighestValueWins\HighestValue.csproj", "{01D6D526-9586-44BB-82F4-10ABACF58B61}"
 EndProject
 Global
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Whirlpool", "Modules\Effect\Whirlpool\Whirlpool.csproj", "{A722BF8D-1D56-4EB7-B7B0-AFBECC28ED7C}"
+EndProjectGlobal
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|Mixed Platforms = Debug|Mixed Platforms
@@ -2030,6 +2032,7 @@ Global
 		{0FF95798-EB47-47F4-A640-4ADFC85D99AE}.Release|x64.Build.0 = Release|x64
 		{0FF95798-EB47-47F4-A640-4ADFC85D99AE}.Release|x86.ActiveCfg = Release|x86
 		{0FF95798-EB47-47F4-A640-4ADFC85D99AE}.Release|x86.Build.0 = Release|x86
+		{0FF95798-EB47-47F4-A640-4ADFC85D99AE}.Release|x86.Build.0 = Release|x86
 		{3BCD7307-C584-4770-BC60-4142DDC88C76}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{3BCD7307-C584-4770-BC60-4142DDC88C76}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
 		{3BCD7307-C584-4770-BC60-4142DDC88C76}.Debug|Mixed Platforms.Build.0 = Debug|x86
@@ -2120,6 +2123,23 @@ Global
 		{01D6D526-9586-44BB-82F4-10ABACF58B61}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
+		{0FF95798-EB47-47F4-A640-4ADFC85D99AE}.Release|x86.Build.0 = Release|x86
+		{A722BF8D-1D56-4EB7-B7B0-AFBECC28ED7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A722BF8D-1D56-4EB7-B7B0-AFBECC28ED7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A722BF8D-1D56-4EB7-B7B0-AFBECC28ED7C}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{A722BF8D-1D56-4EB7-B7B0-AFBECC28ED7C}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{A722BF8D-1D56-4EB7-B7B0-AFBECC28ED7C}.Debug|x64.ActiveCfg = Debug|x64
+		{A722BF8D-1D56-4EB7-B7B0-AFBECC28ED7C}.Debug|x64.Build.0 = Debug|x64
+		{A722BF8D-1D56-4EB7-B7B0-AFBECC28ED7C}.Debug|x86.ActiveCfg = Debug|x86
+		{A722BF8D-1D56-4EB7-B7B0-AFBECC28ED7C}.Debug|x86.Build.0 = Debug|x86
+		{A722BF8D-1D56-4EB7-B7B0-AFBECC28ED7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A722BF8D-1D56-4EB7-B7B0-AFBECC28ED7C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A722BF8D-1D56-4EB7-B7B0-AFBECC28ED7C}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{A722BF8D-1D56-4EB7-B7B0-AFBECC28ED7C}.Release|Mixed Platforms.Build.0 = Release|x86
+		{A722BF8D-1D56-4EB7-B7B0-AFBECC28ED7C}.Release|x64.ActiveCfg = Release|x64
+		{A722BF8D-1D56-4EB7-B7B0-AFBECC28ED7C}.Release|x64.Build.0 = Release|x64
+		{A722BF8D-1D56-4EB7-B7B0-AFBECC28ED7C}.Release|x86.ActiveCfg = Release|x86
+		{A722BF8D-1D56-4EB7-B7B0-AFBECC28ED7C}.Release|x86.Build.0 = Release|x86
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
@@ -2265,8 +2285,8 @@ Global
 		{4AA17571-2592-453E-9976-368D0E9E0A56} = {1F565F1F-0815-4819-B72C-FE4CAE9DECD9}
 		{FBD9C6E2-9E33-4B5F-B2BF-0F4C22C259A2} = {0E86725B-55F2-43AB-96A9-2B9B89BE4473}
 		{01D6D526-9586-44BB-82F4-10ABACF58B61} = {1F565F1F-0815-4819-B72C-FE4CAE9DECD9}
-	EndGlobalSection
-	GlobalSection(ExtensibilityGlobals) = postSolution
+		{A722BF8D-1D56-4EB7-B7B0-AFBECC28ED7C} = {0E86725B-55F2-43AB-96A9-2B9B89BE4473}	
+EndGlobalSection	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {09F55EB1-2643-454B-A1C2-8A326FFA78E6}
 	EndGlobalSection
 	GlobalSection(TestCaseManagementSettings) = postSolution
