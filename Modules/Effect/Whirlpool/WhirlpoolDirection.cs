@@ -7,6 +7,10 @@ namespace VixenModules.Effect.Whirlpool
 		[Description("In")]
 		In,
 		[Description("Out")]
-		Out
+		Out,
+		[Description("InOut")]
+		InOut,
+		[Description("OutIn")]
+		OutIn
 	}
 }

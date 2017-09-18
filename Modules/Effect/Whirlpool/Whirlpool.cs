@@ -21,6 +21,9 @@ namespace VixenModules.Effect.Whirlpool
 		private int _frame;
 		private int _frameCount;
 		private int _numberFrames;
+		private IPixelFrameBuffer _tempBuffer;
+		private bool _whirlpoolDirection;
+		private int _adjustedIterations;
 
 		public Whirlpool()
 		{
@@ -70,12 +73,12 @@ namespace VixenModules.Effect.Whirlpool
 		[PropertyEditor("SliderEditor")]
 		[NumberRange(1, 10, 1)]
 		[PropertyOrder(1)]
-		public int Speed
+		public int Iterations
 		{
-			get { return _data.Speed; }
+			get { return _data.Iterations; }
 			set
 			{
-				_data.Speed = value;
+				_data.Iterations = value;
 				IsDirty = true;
 				OnPropertyChanged();
 			}
@@ -101,8 +104,8 @@ namespace VixenModules.Effect.Whirlpool
 
 		[Value]
 		[ProviderCategory(@"Movement", 1)]
-		[ProviderDisplayName(@"Thickness")]
-		[ProviderDescription(@"Thickness")]
+		[ProviderDisplayName(@"WhirlpoolThickness")]
+		[ProviderDescription(@"WhirlpoolThickness")]
 		[PropertyEditor("SliderEditor")]
 		[NumberRange(1, 100, 1)]
 		[PropertyOrder(3)]
@@ -272,8 +275,27 @@ namespace VixenModules.Effect.Whirlpool
 
 		protected override void SetupRender()
 		{
-			tempBuffer = new PixelFrameBuffer(BufferWi, BufferHt);
+			_tempBuffer = new PixelFrameBuffer(BufferWi, BufferHt);
 			_numberFrames = GetNumberFrames();
+			switch (Direction)
+			{
+				case WhirlpoolDirection.InOut:
+					_adjustedIterations = Iterations*2;
+					_whirlpoolDirection = true;
+					break;
+				case WhirlpoolDirection.In:
+					_whirlpoolDirection = true;
+					_adjustedIterations = Iterations;
+					break;
+				case WhirlpoolDirection.OutIn:
+					_adjustedIterations = Iterations * 2;
+					_whirlpoolDirection = false;
+					break;
+				case WhirlpoolDirection.Out:
+					_whirlpoolDirection = false;
+					_adjustedIterations = Iterations;
+					break;
+			}
 		}
 
 		protected override void CleanUpRender()
@@ -281,63 +303,39 @@ namespace VixenModules.Effect.Whirlpool
 			//Nothing to do.
 		}
 
-		private Color[,] a;
-
-		private IPixelFrameBuffer tempBuffer;
-
 		protected override void RenderEffect(int frame, IPixelFrameBuffer frameBuffer)
 		{
 			double level = LevelCurve.GetValue(GetEffectTimeIntervalPosition(frame) * 100) / 100;
-			var intervalPos = GetEffectTimeIntervalPosition(frame);
-			var intervalPosFactor = intervalPos * 100;
 
 			InitialRender(frame, level);
-
-
-		//	frameBuffer = tempBuffer;
-		//	HSV hsv = HSV.FromRGB(Colors[1].GetColorAt((intervalPosFactor)/100));
 			
-			// copy to frameBuffer
-			for (int x = 0; x < BufferWi; x++) //(BufferWi / 2) - (Width / 2) - 1; x < (BufferWi / 2) + (Width / 2) + 1; x++)
+			for (int x = 0; x < BufferWi; x++)
 			{
-				for (int y = 0; y < BufferHt; y++) //(BufferHt / 2) - (Height / 2) - 1; y < (BufferHt / 2) + (Height / 2) + 1; y++)
+				for (int y = 0; y < BufferHt; y++)
 				{
-					//if (a[x, y] == Color.Red)
-						CalculatePixel(x, y, level, frameBuffer, intervalPosFactor);
+						CalculatePixel(x, y, frameBuffer);
 				}
 			}
 		}
 
 		protected override void RenderEffectByLocation(int numFrames, PixelLocationFrameBuffer frameBuffer)
 		{
-			var nodes = frameBuffer.ElementLocations.OrderBy(x => x.X).ThenBy(x => x.Y).GroupBy(x => x.X);
 			for (int frame = 0; frame < numFrames; frame++)
 			{
-				var intervalPos = GetEffectTimeIntervalPosition(frame);
-				var intervalPosFactor = intervalPos * 100;
 				frameBuffer.CurrentFrame = frame;
-				double level = LevelCurve.GetValue(GetEffectTimeIntervalPosition(frame)*100)/100;
+				double level = LevelCurve.GetValue(GetEffectTimeIntervalPosition(frame) * 100) / 100;
 
-		//		HSV hsv = HSV.FromRGB(Colors[1].GetColorAt((intervalPosFactor)/100));
 				InitialRender(frame, level);
-				//foreach (IGrouping<int, ElementLocation> elementLocations in nodes)
-				//{
-				//	foreach (var elementLocation in elementLocations)
-				//	{
-				//		if (a[elementLocation.X, elementLocation.Y] == Color.Red)
-				//			CalculatePixel(elementLocation.X, elementLocation.Y, level, frameBuffer, intervalPosFactor);
-				//	}
-				//}
 
 				foreach (var elementLocation in frameBuffer.ElementLocations)
 				{
-					CalculatePixel(elementLocation.X, elementLocation.Y, level, frameBuffer, intervalPosFactor);
+					CalculatePixel(elementLocation.X, elementLocation.Y, frameBuffer);
 				}
 			}
 
 		}
 
-		private void CalculatePixel(int x, int y, double level, IPixelFrameBuffer frameBuffer, double intervalPosFactor)
+		private void CalculatePixel(int x, int y, IPixelFrameBuffer frameBuffer)
 		{
 			int yCoord = y;
 			int xCoord = x;
@@ -349,9 +347,9 @@ namespace VixenModules.Effect.Whirlpool
 				x = x - BufferWiOffset;
 			}
 
-			if (tempBuffer.GetColorAt(x, y) != Color.Transparent)
+			if (_tempBuffer.GetColorAt(x, y) != Color.Transparent)
 			{
-				frameBuffer.SetPixel(xCoord, yCoord, tempBuffer.GetColorAt(x, y));
+				frameBuffer.SetPixel(xCoord, yCoord, _tempBuffer.GetColorAt(x, y));
 			}
 		}
 
@@ -380,20 +378,20 @@ namespace VixenModules.Effect.Whirlpool
 			{
 				for (int z = 0; z < BufferHt; z++)
 				{
-					tempBuffer.SetPixel(i, z, Color.Transparent);
+					_tempBuffer.SetPixel(i, z, Color.Transparent);
 				}
 			}
 
 			if (frame == 0)
 			{
 				_frame = 1;
-				_frameCount = _numberFrames / Speed;
+				_frameCount = _numberFrames / _adjustedIterations;
 			}
 
-			int maxPixels = (((width * height + 167) / _frameCount) * _frame * Speed) / spacing;
+			int maxPixels = (((width * height + 167) / _frameCount) * _frame) / spacing;
 
 			//Setup Initial Values
-			if (Direction == WhirlpoolDirection.In)
+			if (_whirlpoolDirection)
 			{
 				//Assuming end location is the middle of the Matrix we need to start at a location half the height and half the width away from middle.
 				positionX = (BufferWi / 2) - (width / 2);
@@ -452,26 +450,22 @@ namespace VixenModules.Effect.Whirlpool
 
 				if (i >= 0)
 				{
-					//Loops through to obtain correct Thickness.
+					//Loops through to set correct Thickness.
 					for (int k = 0; k < thickness; k++)
 					{
 						switch (thicknessDirection)
 						{
 							case 0:
-								// add if statement and swap X and Y around for clockwise and anti-clockwise
-								tempBuffer.SetPixel(positionX - k + xOffSet, positionY + yOffSet, hsv);
+								_tempBuffer.SetPixel(positionX - k + xOffSet, positionY + yOffSet, hsv);
 								break;
 							case 1:
-								// add if statement and swap X and Y around for clockwise and anti-clockwise
-								tempBuffer.SetPixel(positionX + xOffSet, positionY - k + yOffSet, hsv);
+								_tempBuffer.SetPixel(positionX + xOffSet, positionY - k + yOffSet, hsv);
 								break;
 							case 2:
-								// add if statement and swap X and Y around for clockwise and anti-clockwise
-								tempBuffer.SetPixel(positionX + k + xOffSet, positionY + yOffSet, hsv);
+								_tempBuffer.SetPixel(positionX + k + xOffSet, positionY + yOffSet, hsv);
 								break;
 							case 3:
-								// add if statement and swap X and Y around for clockwise and anti-clockwise
-								tempBuffer.SetPixel(positionX + xOffSet, positionY + k + yOffSet, hsv);
+								_tempBuffer.SetPixel(positionX + xOffSet, positionY + k + yOffSet, hsv);
 								break;
 						}
 					}
@@ -488,7 +482,7 @@ namespace VixenModules.Effect.Whirlpool
 					stepPosition = 2;
 					direction = (direction + 1)%4;
 					colorIndex = (colorIndex + 1)%Colors.Count;
-					if (Direction == WhirlpoolDirection.In)
+					if (_whirlpoolDirection)
 					{
 						if (direction == 0 || direction == 2)
 						{
@@ -517,7 +511,7 @@ namespace VixenModules.Effect.Whirlpool
 				}
 
 				//Change Postion X/Y based on Direction
-				if (Direction == WhirlpoolDirection.In)
+				if (_whirlpoolDirection)
 				{
 					switch (direction)
 					{
@@ -566,7 +560,9 @@ namespace VixenModules.Effect.Whirlpool
 			//Checks to see if we are at the end of the current Iteration and reset _frame count and tempbuffer if we are, this will then start a new Whirlpool.
 			if (_frameCount == _frame)
 			{
-				if (_numberFrames / Speed > _numberFrames - frame) return;
+				if (_numberFrames / _adjustedIterations > _numberFrames - frame) return;
+				if (Direction == WhirlpoolDirection.InOut || Direction == WhirlpoolDirection.OutIn)
+					_whirlpoolDirection = !_whirlpoolDirection;
 				_frame = 1;
 			}
 			_frame++;

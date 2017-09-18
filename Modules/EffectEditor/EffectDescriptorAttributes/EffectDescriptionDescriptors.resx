@@ -728,6 +728,8 @@
   </data>
   <data name="RandomSize" xml:space="preserve">
     <value>Randomly adjust the shape size.</value>
+  </data>  <data name="WhirlpoolThickness" xml:space="preserve">
+    <value>Controls how thick the Whirlpool is.</value>
   </data>
   <data name="AllowMarkGaps" xml:space="preserve">
     <value>When selected, the effect does not fill gaps in the marks with a REST.</value>

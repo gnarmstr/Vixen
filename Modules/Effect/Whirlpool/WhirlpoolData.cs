@@ -18,7 +18,7 @@ namespace VixenModules.Effect.Whirlpool
 		{
 			Colors = new List<ColorGradient>{new ColorGradient(Color.Red)};
 			Direction = WhirlpoolDirection.In;
-			Speed = 1;
+			Iterations = 1;
 			XOffsetCurve = new Curve(new PointPairList(new[] { 0.0, 100.0 }, new[] { 50.0, 50.0 }));
 			YOffsetCurve = new Curve(new PointPairList(new[] { 0.0, 100.0 }, new[] { 50.0, 50.0 }));
 			Spacing = 2;
@@ -36,7 +36,7 @@ namespace VixenModules.Effect.Whirlpool
 		public List<ColorGradient> Colors { get; set; }
 
 		[DataMember]
-		public int Speed { get; set; }
+		public int Iterations { get; set; }
 
 		[DataMember]
 		public int Spacing { get; set; }
@@ -79,7 +79,7 @@ namespace VixenModules.Effect.Whirlpool
 			WhirlpoolData result = new WhirlpoolData
 			{
 				Colors = Colors.ToList(),
-				Speed = Speed,
+				Iterations = Iterations,
 				Direction = Direction,
 				Spacing = Spacing,
 				WidthCurve = new Curve(WidthCurve),

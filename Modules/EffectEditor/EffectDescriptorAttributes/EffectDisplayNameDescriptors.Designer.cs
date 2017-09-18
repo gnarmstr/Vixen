@@ -2159,6 +2159,15 @@ namespace VixenModules.EffectEditor.EffectDescriptorAttributes {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Thickness.
+        /// </summary>
+        internal static string WhirlpoolThickness {
+            get {
+                return ResourceManager.GetString("WhirlpoolThickness", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Wipe Count.
         /// </summary>
         internal static string WipeCount {

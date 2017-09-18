@@ -2186,6 +2186,15 @@ namespace VixenModules.EffectEditor.EffectDescriptorAttributes {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Controls how thick the Whirlpool is..
+        /// </summary>
+        internal static string WhirlpoolThickness {
+            get {
+                return ResourceManager.GetString("WhirlpoolThickness", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The width over time of the effect..
         /// </summary>
         internal static string WidthCurve {
