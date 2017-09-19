@@ -485,6 +485,15 @@ namespace VixenModules.EffectEditor.EffectDescriptorAttributes {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Color Mode.
+        /// </summary>
+        internal static string ColorMode {
+            get {
+                return ResourceManager.GetString("ColorMode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Color 1.
         /// </summary>
         internal static string ColorOne {

@@ -190,15 +190,34 @@ namespace VixenModules.Effect.Whirlpool
 
 		[Value]
 		[ProviderCategory(@"Color", 2)]
-		[ProviderDisplayName(@"GradientMode")]
-		[ProviderDescription(@"GradientMode")]
+		[ProviderDisplayName(@"ColorMode")]
+		[ProviderDescription(@"ColorMode")]
 		[PropertyOrder(0)]
-		public GradientMode GradientMode
+		public ColorMode ColorMode
 		{
-			get { return _data.GradientMode; }
+			get { return _data.ColorMode; }
 			set
 			{
-				_data.GradientMode = value;
+				_data.ColorMode = value;
+				IsDirty = true;
+				UpdateColorModeAttribute();
+				OnPropertyChanged();
+			}
+		}
+
+		[Value]
+		[ProviderCategory(@"Color", 2)]
+		[ProviderDisplayName(@"GroupLevel")]
+		[ProviderDescription(@"GroupLevel")]
+		[PropertyEditor("SliderEditor")]
+		[NumberRange(1, 50, 1)]
+		[PropertyOrder(1)]
+		public int GroupLevel
+		{
+			get { return _data.GroupLevel; }
+			set
+			{
+				_data.GroupLevel = value;
 				IsDirty = true;
 				OnPropertyChanged();
 			}
@@ -208,7 +227,7 @@ namespace VixenModules.Effect.Whirlpool
 		[ProviderCategory(@"Color", 2)]
 		[ProviderDisplayName(@"Colors")]
 		[ProviderDescription(@"Colors")]
-		[PropertyOrder(1)]
+		[PropertyOrder(2)]
 		public List<ColorGradient> Colors
 		{
 			get { return _data.Colors; }
@@ -270,7 +289,20 @@ namespace VixenModules.Effect.Whirlpool
 		private void UpdateAllAttributes()
 		{
 			UpdateStringOrientationAttributes();
+			UpdateColorModeAttribute(false);
 			TypeDescriptor.Refresh(this);
+		}
+
+		private void UpdateColorModeAttribute(bool refresh = true)
+		{
+			bool colorMode = ColorMode != ColorMode.Alternating;
+			Dictionary<string, bool> propertyStates = new Dictionary<string, bool>(1);
+			propertyStates.Add("GroupLevel", !colorMode);
+			SetBrowsable(propertyStates);
+			if (refresh)
+			{
+				TypeDescriptor.Refresh(this);
+			}
 		}
 
 		protected override void SetupRender()
@@ -372,6 +404,7 @@ namespace VixenModules.Effect.Whirlpool
 			int stepPosition;
 			int thicknessDirection;
 			int colorIndex = 0;
+			int groupColorIndex = 0;
 
 			HSV hsv = new HSV();
 			for (int i = 0; i < BufferWi; i++)
@@ -388,7 +421,7 @@ namespace VixenModules.Effect.Whirlpool
 				_frameCount = _numberFrames / _adjustedIterations;
 			}
 
-			int maxPixels = (((width * height + 167) / _frameCount) * _frame) / spacing;
+			int maxPixels = (((width * height + 167) / _frameCount) * _frame) / spacing; //Sets how many pixels will be rendered and increase per frame.
 
 			//Setup Initial Values
 			if (_whirlpoolDirection)
@@ -422,7 +455,7 @@ namespace VixenModules.Effect.Whirlpool
 				else
 				{
 					stepsCount = -steps; //Initial number of moves.
-					positionX = (int)(BufferWi / 2);
+					positionX = (BufferWi / 2);
 					positionY = (BufferHt / 2) - (-steps) / 2;
 					direction = 0; //initial Direction is Up.
 					thicknessDirection = 0;
@@ -435,14 +468,19 @@ namespace VixenModules.Effect.Whirlpool
 			//Loops through the number of required locations.
 			for (int i = 0; i <= maxPixels; i++)
 			{
-				
-				switch (GradientMode)
+				switch (ColorMode)
 				{
-					case GradientMode.OverTime:
+					case ColorMode.OverTime:
 						hsv = HSV.FromRGB(Colors[colorIndex].GetColorAt((intervalPosFactor)/100));
 						break;
-					case GradientMode.OverElement:
+					case ColorMode.OverElement:
 						hsv = HSV.FromRGB(Colors[colorIndex].GetColorAt((100 / (double)(maxPixels) * i) / 100));
+						break;
+					case ColorMode.Alternating:
+						groupColorIndex = (groupColorIndex + 1)%(GroupLevel);
+						if (groupColorIndex == GroupLevel - 1)
+							colorIndex = (colorIndex + 1)%Colors.Count;
+						hsv = HSV.FromRGB(Colors[colorIndex].GetColorAt((intervalPosFactor) / 100));
 						break;
 				}
 
@@ -481,7 +519,8 @@ namespace VixenModules.Effect.Whirlpool
 					//Change Direction.
 					stepPosition = 2;
 					direction = (direction + 1)%4;
-					colorIndex = (colorIndex + 1)%Colors.Count;
+					if (ColorMode != ColorMode.Alternating)
+						colorIndex = (colorIndex + 1)%Colors.Count;
 					if (_whirlpoolDirection)
 					{
 						if (direction == 0 || direction == 2)

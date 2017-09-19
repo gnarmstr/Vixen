@@ -862,5 +862,6 @@
   </data>
   <data name="ColorPerStep" xml:space="preserve">
     <value>When enabled the color will change for each Step variation.</value>
-  </data>
-</root>
+  </data>  <data name="ColorMode" xml:space="preserve">
+    <value>Controls how the colors are applied to the effect.</value>
+  </data></root>

@@ -25,11 +25,12 @@ namespace VixenModules.Effect.Whirlpool
 			WidthCurve = new Curve(new PointPairList(new[] { 0.0, 100.0 }, new[] { 100.0, 100.0 }));
 			HeightCurve = new Curve(new PointPairList(new[] { 0.0, 100.0 }, new[] { 100.0, 100.0 }));
 			Thickness = 1;
+			GroupLevel = 1;
 			LevelCurve = new Curve(new PointPairList(new[] { 0.0, 100.0 }, new[] { 100.0, 100.0 }));
 			BlendCurve = new Curve(new PointPairList(new[] { 0.0, 100.0 }, new[] { 70.0, 70.0 }));
 			BackgroundLevelCurve = new Curve(new PointPairList(new[] { 0.0, 100.0 }, new[] { 70.0, 70.0 }));
 			Orientation = StringOrientation.Vertical;
-			GradientMode = GradientMode.OverTime;
+			ColorMode = ColorMode.OverTime;
 		}
 
 		[DataMember]
@@ -39,10 +40,13 @@ namespace VixenModules.Effect.Whirlpool
 		public int Iterations { get; set; }
 
 		[DataMember]
+		public int GroupLevel { get; set; }
+
+		[DataMember]
 		public int Spacing { get; set; }
 
 		[DataMember]
-		public GradientMode GradientMode { get; set; }
+		public ColorMode ColorMode { get; set; }
 
 		[DataMember]
 		public Curve WidthCurve { get; set; }
@@ -82,13 +86,14 @@ namespace VixenModules.Effect.Whirlpool
 				Iterations = Iterations,
 				Direction = Direction,
 				Spacing = Spacing,
+				GroupLevel = GroupLevel,
 				WidthCurve = new Curve(WidthCurve),
 				HeightCurve = new Curve(HeightCurve),
 				Thickness = Thickness,
 				XOffsetCurve = new Curve(XOffsetCurve),
 				YOffsetCurve = new Curve(YOffsetCurve),
 				Orientation = Orientation,
-				GradientMode = GradientMode,
+				ColorMode = ColorMode,
 				BlendCurve = new Curve(BlendCurve),
 				LevelCurve = new Curve(LevelCurve),
 				BackgroundLevelCurve = new Curve(BackgroundLevelCurve)

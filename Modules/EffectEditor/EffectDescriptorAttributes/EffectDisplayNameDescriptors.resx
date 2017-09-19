@@ -853,5 +853,6 @@
   </data>
   <data name="ColorPerStep" xml:space="preserve">
     <value>Color Per Step</value>
-  </data>
-</root>
+  </data>  <data name="ColorMode" xml:space="preserve">
+    <value>Color Mode</value>
+  </data></root>
