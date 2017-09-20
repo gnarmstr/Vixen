@@ -1619,6 +1619,15 @@ namespace VixenModules.EffectEditor.EffectDescriptorAttributes {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Reverse Fill.
+        /// </summary>
+        internal static string ReverseFill {
+            get {
+                return ResourceManager.GetString("ReverseFill", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Revolution Count.
         /// </summary>
         internal static string RevolutionCount {

@@ -4,11 +4,11 @@ namespace VixenModules.Effect.Whirlpool
 {
 	public enum ColorMode
 	{
-		[Description("Normal - Graient Over Time")]
+		[Description("Normal - Gradient Over Time")]
 		OverTime,
 		[Description("Normal - Gradient Over Element")]
 		OverElement,
-		[Description("Alternating - Graient Over Time")]
+		[Description("Alternating - Gradient Over Time")]
 		Alternating
 	}
 }

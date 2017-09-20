@@ -31,6 +31,7 @@ namespace VixenModules.Effect.Whirlpool
 			BackgroundLevelCurve = new Curve(new PointPairList(new[] { 0.0, 100.0 }, new[] { 70.0, 70.0 }));
 			Orientation = StringOrientation.Vertical;
 			ColorMode = ColorMode.OverTime;
+			ReverseFill = false;
 		}
 
 		[DataMember]
@@ -41,6 +42,9 @@ namespace VixenModules.Effect.Whirlpool
 
 		[DataMember]
 		public int GroupLevel { get; set; }
+
+		[DataMember]
+		public bool ReverseFill { get; set; }
 
 		[DataMember]
 		public int Spacing { get; set; }
@@ -96,7 +100,8 @@ namespace VixenModules.Effect.Whirlpool
 				ColorMode = ColorMode,
 				BlendCurve = new Curve(BlendCurve),
 				LevelCurve = new Curve(LevelCurve),
-				BackgroundLevelCurve = new Curve(BackgroundLevelCurve)
+				BackgroundLevelCurve = new Curve(BackgroundLevelCurve),
+				ReverseFill = ReverseFill
 			};
 			return result;
 		}

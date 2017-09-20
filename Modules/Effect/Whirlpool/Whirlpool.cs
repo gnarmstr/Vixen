@@ -24,6 +24,7 @@ namespace VixenModules.Effect.Whirlpool
 		private IPixelFrameBuffer _tempBuffer;
 		private bool _whirlpoolDirection;
 		private int _adjustedIterations;
+		private bool _reverseDirection;
 
 		public Whirlpool()
 		{
@@ -68,11 +69,27 @@ namespace VixenModules.Effect.Whirlpool
 
 		[Value]
 		[ProviderCategory(@"Movement", 1)]
+		[ProviderDisplayName(@"ReverseFill")]
+		[ProviderDescription(@"ReverseFill")]
+		[PropertyOrder(1)]
+		public bool ReverseFill
+		{
+			get { return _data.ReverseFill; }
+			set
+			{
+				_data.ReverseFill = value;
+				IsDirty = true;
+				OnPropertyChanged();
+			}
+		}
+
+		[Value]
+		[ProviderCategory(@"Movement", 1)]
 		[ProviderDisplayName(@"Iterations")]
 		[ProviderDescription(@"Iterations")]
 		[PropertyEditor("SliderEditor")]
 		[NumberRange(1, 10, 1)]
-		[PropertyOrder(1)]
+		[PropertyOrder(2)]
 		public int Iterations
 		{
 			get { return _data.Iterations; }
@@ -90,7 +107,7 @@ namespace VixenModules.Effect.Whirlpool
 		[ProviderDescription(@"Spacing")]
 		[PropertyEditor("SliderEditor")]
 		[NumberRange(1, 100, 1)]
-		[PropertyOrder(2)]
+		[PropertyOrder(3)]
 		public int Spacing
 		{
 			get { return _data.Spacing; }
@@ -108,7 +125,7 @@ namespace VixenModules.Effect.Whirlpool
 		[ProviderDescription(@"WhirlpoolThickness")]
 		[PropertyEditor("SliderEditor")]
 		[NumberRange(1, 100, 1)]
-		[PropertyOrder(3)]
+		[PropertyOrder(4)]
 		public int Thickness
 		{
 			get { return _data.Thickness; }
@@ -124,7 +141,7 @@ namespace VixenModules.Effect.Whirlpool
 		[ProviderCategory(@"Movement", 1)]
 		[ProviderDisplayName(@"Width")]
 		[ProviderDescription(@"Width")]
-		[PropertyOrder(4)]
+		[PropertyOrder(5)]
 		public Curve WidthCurve
 		{
 			get { return _data.WidthCurve; }
@@ -140,7 +157,7 @@ namespace VixenModules.Effect.Whirlpool
 		[ProviderCategory(@"Movement", 1)]
 		[ProviderDisplayName(@"Height")]
 		[ProviderDescription(@"Height")]
-		[PropertyOrder(5)]
+		[PropertyOrder(6)]
 		public Curve HeightCurve
 		{
 			get { return _data.HeightCurve; }
@@ -156,7 +173,7 @@ namespace VixenModules.Effect.Whirlpool
 		[ProviderCategory(@"Movement", 1)]
 		[ProviderDisplayName(@"Vertical Offset")]
 		[ProviderDescription(@"Vertical Offset")]
-		[PropertyOrder(6)]
+		[PropertyOrder(7)]
 		public Curve YOffsetCurve
 		{
 			get { return _data.YOffsetCurve; }
@@ -172,7 +189,7 @@ namespace VixenModules.Effect.Whirlpool
 		[ProviderCategory(@"Movement", 1)]
 		[ProviderDisplayName(@"Horizontal Offset")]
 		[ProviderDescription(@"Horizontal Offset")]
-		[PropertyOrder(7)]
+		[PropertyOrder(8)]
 		public Curve XOffsetCurve
 		{
 			get { return _data.XOffsetCurve; }
@@ -314,19 +331,23 @@ namespace VixenModules.Effect.Whirlpool
 				case WhirlpoolDirection.InOut:
 					_adjustedIterations = Iterations*2;
 					_whirlpoolDirection = true;
+					_reverseDirection = false;
 					break;
 				case WhirlpoolDirection.In:
 					_whirlpoolDirection = true;
 					_adjustedIterations = Iterations;
-					break;
-				case WhirlpoolDirection.OutIn:
-					_adjustedIterations = Iterations * 2;
-					_whirlpoolDirection = false;
+					_reverseDirection = false;
 					break;
 				case WhirlpoolDirection.Out:
 					_whirlpoolDirection = false;
 					_adjustedIterations = Iterations;
+					_reverseDirection = false;
 					break;
+			}
+			if (ReverseFill)
+			{
+				_reverseDirection = !_reverseDirection;
+				_whirlpoolDirection = !_whirlpoolDirection;
 			}
 		}
 
@@ -405,6 +426,7 @@ namespace VixenModules.Effect.Whirlpool
 			int thicknessDirection;
 			int colorIndex = 0;
 			int groupColorIndex = 0;
+			int totalFrames;
 
 			HSV hsv = new HSV();
 			for (int i = 0; i < BufferWi; i++)
@@ -420,8 +442,16 @@ namespace VixenModules.Effect.Whirlpool
 				_frame = 1;
 				_frameCount = _numberFrames / _adjustedIterations;
 			}
+			if (_reverseDirection)
+			{
+				totalFrames = (_frameCount -_frame);
+			}
+			else
+			{
+				totalFrames = _frame;
+			}
 
-			int maxPixels = (((width * height + 167) / _frameCount) * _frame) / spacing; //Sets how many pixels will be rendered and increase per frame.
+			int maxPixels = (((width * height + 167) / _frameCount) * totalFrames) / spacing; //Sets how many pixels will be rendered and will increase per frame.
 
 			//Setup Initial Values
 			if (_whirlpoolDirection)
@@ -600,9 +630,11 @@ namespace VixenModules.Effect.Whirlpool
 			if (_frameCount == _frame)
 			{
 				if (_numberFrames / _adjustedIterations > _numberFrames - frame) return;
-				if (Direction == WhirlpoolDirection.InOut || Direction == WhirlpoolDirection.OutIn)
-					_whirlpoolDirection = !_whirlpoolDirection;
-				_frame = 1;
+				if (Direction == WhirlpoolDirection.InOut)
+				{
+					_reverseDirection = !_reverseDirection;
+				}
+				_frame = 0;
 			}
 			_frame++;
 		}

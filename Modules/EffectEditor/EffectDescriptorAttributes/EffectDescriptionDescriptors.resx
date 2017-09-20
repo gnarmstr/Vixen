@@ -864,4 +864,8 @@
     <value>When enabled the color will change for each Step variation.</value>
   </data>  <data name="ColorMode" xml:space="preserve">
     <value>Controls how the colors are applied to the effect.</value>
-  </data></root>
+  </data>
+  <data name="ReverseFill" xml:space="preserve">
+    <value>Reverse will start with a full Whirlpool and clears in or out.</value>
+  </data>
+</root>

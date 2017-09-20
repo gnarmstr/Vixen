@@ -855,4 +855,8 @@
     <value>Color Per Step</value>
   </data>  <data name="ColorMode" xml:space="preserve">
     <value>Color Mode</value>
-  </data></root>
+  </data>
+  <data name="ReverseFill" xml:space="preserve">
+    <value>Reverse Fill</value>
+  </data>
+</root>

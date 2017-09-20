@@ -1574,6 +1574,15 @@ namespace VixenModules.EffectEditor.EffectDescriptorAttributes {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Reverse will start with a full Whirlpool and clears in or out..
+        /// </summary>
+        internal static string ReverseFill {
+            get {
+                return ResourceManager.GetString("ReverseFill", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Controls how many revolutions of the spin will occur..
         /// </summary>
         internal static string RevolutionCount {
