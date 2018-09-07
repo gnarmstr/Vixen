@@ -414,6 +414,11 @@ namespace VixenModules.Editor.TimedSequenceEditor
 			HandleDockContentToolStripMenuClick(GradientLibraryForm, DockState.DockRight);
 		}
 
+		private void toolStripMenuItemMediaLibrary_Click(object sender, EventArgs e)
+		{
+			HandleDockContentToolStripMenuClick(MediaLibrary, DockState.DockLeft);
+		}
+
 		private void HandleDockContentToolStripMenuClick(DockContent dockWindow, DockState state)
 		{
 			if (dockWindow.IsHidden || dockWindow.DockState == DockState.Unknown)

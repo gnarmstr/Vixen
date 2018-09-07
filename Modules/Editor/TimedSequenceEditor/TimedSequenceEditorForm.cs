@@ -252,6 +252,8 @@ namespace VixenModules.Editor.TimedSequenceEditor
 				return EffectEditorForm;
 			if (persistString == typeof (LayerEditor).ToString())
 				return LayerEditor;
+			if (persistString == typeof(MediaLibraryForm).ToString())
+				return MediaLibrary;
 			if (persistString == "VixenModules.Editor.TimedSequenceEditor.Form_ToolPalette")
 				return null;
 
@@ -600,6 +602,11 @@ namespace VixenModules.Editor.TimedSequenceEditor
 				_findEffects.Dispose();
 				_findEffects = null;
 			}
+			if (_mediaLibrary != null)
+			{
+				_mediaLibrary.Dispose();
+				_mediaLibrary = null;
+			}
 			SetDockDefaults();
 		}
 
@@ -724,6 +731,11 @@ namespace VixenModules.Editor.TimedSequenceEditor
 			if (_findEffects != null && !_findEffects.IsDisposed)
 			{
 				_findEffects.Dispose();
+			}
+
+			if (_mediaLibrary != null && !_mediaLibrary.IsDisposed)
+			{
+				_mediaLibrary.Dispose();
 			}
 
 			TimelineControl.SelectionChanged -= TimelineControlOnSelectionChanged;
@@ -1066,6 +1078,23 @@ namespace VixenModules.Editor.TimedSequenceEditor
 				_findEffects = new FindEffectForm(TimelineControl, Sequence.GetSequenceLayerManager());
 
 				return _findEffects;
+			}
+		}
+
+		private MediaLibraryForm _mediaLibrary;
+
+		private MediaLibraryForm MediaLibrary
+		{
+			get
+			{
+				if (_mediaLibrary != null && !_mediaLibrary.IsDisposed)
+				{
+					return _mediaLibrary;
+				}
+
+				_mediaLibrary = new MediaLibraryForm(TimelineControl);
+
+				return _mediaLibrary;
 			}
 		}
 
@@ -5498,7 +5527,7 @@ namespace VixenModules.Editor.TimedSequenceEditor
 			toolStripMenuItemColorLibrary.Checked = !(_colorLibraryForm == null || _colorLibraryForm.DockState == DockState.Unknown);
 			toolStripMenuItemGradientLibrary.Checked = !(_gradientLibraryForm == null || _gradientLibraryForm.DockState == DockState.Unknown);
 			toolStripMenuItemCurveLibrary.Checked = !(_curveLibraryForm == null || _curveLibraryForm.DockState == DockState.Unknown);
-			gridWindowToolStripMenuItem.Checked = !(GridForm.IsHidden || GridForm.DockState == DockState.Unknown);
+			toolStripMenuItemMediaLibrary.Checked = !(_mediaLibrary == null || _mediaLibrary.DockState == DockState.Unknown);
 			effectEditorWindowToolStripMenuItem.Checked =
 				!(_effectEditorForm == null || EffectEditorForm.DockState == DockState.Unknown);
 		}

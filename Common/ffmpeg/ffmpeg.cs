@@ -101,5 +101,22 @@ namespace ffmpeg
 			process.WaitForExit();
 		}
 
+		//Get Video Thumbnail for Media Library
+		public void GetVideoThumbNail(string outputPath, int frame)
+		{
+			//make arguements string
+			string args = $" -i \"{_movieFile}\" -vframes 1 -vf \"select = gte(n\\, {frame}), scale=200:-1\"  \"{outputPath}\"";
+			string ffmpegPath = AppDomain.CurrentDomain.BaseDirectory;
+			ffmpegPath += "Common\\ffmpeg.exe";
+			Console.Out.WriteLine(args);
+			ProcessStartInfo psi = new ProcessStartInfo(ffmpegPath, args);
+			psi.UseShellExecute = false;
+			psi.CreateNoWindow = true;
+			Process process = new Process();
+			process.StartInfo = psi;
+			process.Start();
+			process.WaitForExit();
+		}
+
 	}
 }
