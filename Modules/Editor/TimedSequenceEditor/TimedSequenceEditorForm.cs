@@ -821,7 +821,7 @@ namespace VixenModules.Editor.TimedSequenceEditor
 
 		private void TimelineControlGrid_DragDrop(object sender, DragEventArgs e)
 		{
-			//Checks to see if drag items are of a Filetype, dragged from Windows Explorer.
+			//Checks to see if drag items are of a Filetype, dragged from Windows Explorer or from the Vixen Media Library.
 			if (e.Data.GetDataPresent(DataFormats.FileDrop))
 			{
 				string[] filePaths = e.Data.GetData(DataFormats.FileDrop) as string[]; //Stores path of all selected files.
@@ -5287,6 +5287,7 @@ namespace VixenModules.Editor.TimedSequenceEditor
 			ColorLibraryForm.Close();
 			GradientLibraryForm.Close();
 			CurveLibraryForm.Close();
+			MediaLibrary.Close();
 
 			//These are only saved in options
 			//xml.PutPreference(string.Format("{0}/AutoSaveInterval", Name), _autoSaveTimer.Interval);

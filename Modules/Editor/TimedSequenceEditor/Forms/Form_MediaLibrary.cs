@@ -1,7 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
+using System.Runtime.Serialization;
 using System.Windows.Forms;
+using System.Xml;
+using Common.Controls;
 using Common.Controls.Theme;
 using Common.Controls.Timeline;
 using Common.Resources.Properties;
@@ -19,6 +24,12 @@ namespace VixenModules.Editor.TimedSequenceEditor
 		private TreeNode _selectedItem = new TreeNode();
 		private TreeNode _mNode;
 		private bool _beginDragDrop;
+		XMLProfileSettings _xml;
+		private int _nodeCount;
+		private int processed;
+		private string _mediaFilePath;
+		private Dictionary<string, string> _nodes;
+		private int _treeViewFolderIndex;
 
 		public MediaLibraryForm(TimelineControl timelineControl)
 		{
@@ -27,6 +38,18 @@ namespace VixenModules.Editor.TimedSequenceEditor
 			Icon = Resources.Icon_Vixen3;
 			TimelineControl = timelineControl;
 			ThemeUpdateControls.UpdateControls(this);
+		}
+		private void MediaLibraryForm_Load(object sender, EventArgs e)
+		{
+			processed = 0;
+			for (int i = 0; i < mediaTreeview.Nodes.Count; i++)
+			{
+				if (mediaTreeview.Nodes[i].Name == "Folders")
+				{
+					_treeViewFolderIndex = i;
+				}
+			}
+			PopulateTreeNode();
 		}
 
 		#region GetFiles
@@ -64,13 +87,13 @@ namespace VixenModules.Editor.TimedSequenceEditor
 		
 		private void AddFilesToList(string[] files, string folderPath, bool folder)
 		{
-			int folderIndex = mediaTreeview.Nodes[5].Nodes.Count;
+			int folderIndex = mediaTreeview.Nodes[_treeViewFolderIndex].Nodes.Count;
 			if (folder) // Only if user grabbed entire folder.
 			{
 				bool folderExists = false;
-				for (int i = 0; i < mediaTreeview.Nodes[5].Nodes.Count; i++)
+				for (int i = 0; i < mediaTreeview.Nodes[_treeViewFolderIndex].Nodes.Count; i++)
 				{
-					if (mediaTreeview.Nodes[5].Nodes[i].Name == folderPath)
+					if (mediaTreeview.Nodes[_treeViewFolderIndex].Nodes[i].Name == folderPath)
 					{
 						folderIndex = i;
 						folderExists = true;
@@ -83,7 +106,7 @@ namespace VixenModules.Editor.TimedSequenceEditor
 					folderNode.Tag = "Folder";
 					folderNode.Name = folderPath;
 					folderNode.Text = folderPath;
-					mediaTreeview.Nodes[5].Nodes.Add(folderNode);
+					mediaTreeview.Nodes[_treeViewFolderIndex].Nodes.Add(folderNode);
 				}
 			}
 			foreach (var file in files)
@@ -122,7 +145,7 @@ namespace VixenModules.Editor.TimedSequenceEditor
 				node.Name = file;
 				node.Text = Path.GetFileName(file);
 				mediaTreeview.Nodes[nodeIndex].Nodes.Add(node);
-				if (folder) mediaTreeview.Nodes[5].Nodes[folderIndex].Nodes.Add((TreeNode) node.Clone());
+				if (folder) mediaTreeview.Nodes[_treeViewFolderIndex].Nodes[folderIndex].Nodes.Add((TreeNode) node.Clone());
 			}
 		}
 
@@ -165,6 +188,13 @@ namespace VixenModules.Editor.TimedSequenceEditor
 		// Sets Thumbnail image
 		private void SetThumbNailImage()
 		{
+			if (processed == 1)
+			{
+				processed = 0;
+				return;
+			}
+
+			processed++;
 			try
 			{
 				if (_selectedItem.Tag.ToString() == "Root" || _selectedItem.Tag.ToString() == "Folder")
@@ -192,6 +222,7 @@ namespace VixenModules.Editor.TimedSequenceEditor
 						frameValue.Visible = labelFrame.Visible = false;
 						break;
 					case "Glediator":
+						pictureBox.Image = null;
 						break;
 					case "Shapes":
 						pictureBox.Image = ProcessSVGShapes();
@@ -274,9 +305,9 @@ namespace VixenModules.Editor.TimedSequenceEditor
 			TraverseTree(mediaTreeview.Nodes);
 
 			// Check Folder Nodes to see if any are empty and if they are then remove it.
-			for (int i = mediaTreeview.Nodes[5].Nodes.Count - 1; i >= 0  ; i--)
+			for (int i = mediaTreeview.Nodes[_treeViewFolderIndex].Nodes.Count - 1; i >= 0  ; i--)
 			{
-				if(mediaTreeview.Nodes[5].Nodes[i].Nodes.Count == 0) mediaTreeview.Nodes[5].Nodes.Remove(mediaTreeview.Nodes[5].Nodes[i]);
+				if(mediaTreeview.Nodes[_treeViewFolderIndex].Nodes[i].Nodes.Count == 0) mediaTreeview.Nodes[_treeViewFolderIndex].Nodes.Remove(mediaTreeview.Nodes[_treeViewFolderIndex].Nodes[i]);
 			}
 			
 			pictureBox.Image = null;
@@ -310,46 +341,122 @@ namespace VixenModules.Editor.TimedSequenceEditor
 		#endregion
 
 		#region DragToTimeLine
-		private void mediaTreeview_MouseDown(object sender, MouseEventArgs e)
-		{
-
-			_mNode = mediaTreeview.GetNodeAt(e.X, e.Y);
-
-			_beginDragDrop =
-				(_mNode != null && _mNode.Nodes.Count == 0) &&
-				(e.Button == MouseButtons.Left && e.Clicks == 1);
-		}
-
-		private void mediaTreeview_MouseMove(object sender, MouseEventArgs e)
-		{
-			//if (_beginDragDrop)
-			//{
-			//	_beginDragDrop = false;
-			//	DataObject data = new DataObject(_mNode.Tag);
-			//	mediaTreeview.DoDragDrop(data, DragDropEffects.Copy);
-			//	_DropMediaLibrary();
-			//}
-
-		}
 
 		private void mediaTreeview_ItemDrag(object sender, ItemDragEventArgs e)
 		{
-			DataObject data = new DataObject(_mNode.Tag);
+			List<string> selectedMediaPaths = new List<string>();
+			foreach (var node in mediaTreeview.SelectedNodes) selectedMediaPaths.Add(node.Name);
+
+			DataObject data = new DataObject(DataFormats.FileDrop, selectedMediaPaths.ToArray());
 			mediaTreeview.DoDragDrop(data, DragDropEffects.Copy);
+			selectedMediaPaths.Clear();
 		}
+		#endregion
+
+		#region UpdateTreeview
+
+		// Updates Treeview when mouse enters treeview control. This is done as the user may of added
+		// files to a Windows folder that is listed in the tree view.
+		private void mediaTreeview_MouseEnter(object sender, EventArgs e)
+		{
+			//UpdateMediaLibrary();
+		}
+
+		private void UpdateMediaLibrary()
+		{
+			foreach (TreeNode folderNodes in mediaTreeview.Nodes[_treeViewFolderIndex].Nodes)
+			{
+				// Updates all the Folder paths.
+				string[] files = Directory.GetFiles(folderNodes.Name);
+				AddFilesToList(files, folderNodes.Name, true);
+			}
+		}
+
 		#endregion
 
 		#region Load_Save
-		private void MediaLibraryForm_Load(object sender, EventArgs e)
+
+		// Load Data
+		private void PopulateTreeNode()
 		{
-			// Save Node Tree here and check each reference and remove any that are not found.
+			// Load Node data and check each reference and remove any that are not found.
+			_nodeCount = 0;
+
+			_mediaFilePath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "Vixen", "MediaLibrary.xml");
+
+			if (File.Exists(_mediaFilePath))
+			{
+				_nodes = new Dictionary<string, string>();
+				Load_MediaLibraryFile();
+				_nodes = _nodes.Reverse().ToDictionary(x => x.Key, x => x.Value);
+
+				foreach (var node in _nodes)
+				{
+					if (node.Value == "Folder")
+					{
+						string[] files = Directory.GetFiles(node.Key);
+						AddFilesToList(files, node.Key, true);
+					}
+					else
+					{
+						if (node.Value == "Root" || node.Value == "Folder" || !File.Exists(node.Key)) continue;
+						string[] files = { node.Key };
+						string folderPath = Path.GetDirectoryName(node.Key);
+						AddFilesToList(files, folderPath, false);
+					}
+				}
+			}
 
 		}
+
+		public void Load_MediaLibraryFile()
+		{
+			if (File.Exists(_mediaFilePath))
+			{
+				using (FileStream reader = new FileStream(_mediaFilePath, FileMode.Open, FileAccess.Read))
+				{
+					DataContractSerializer ser = new DataContractSerializer(typeof(Dictionary<string, string>));
+					_nodes = (Dictionary<string, string>)ser.ReadObject(reader);
+				}
+			}
+		}
+
+		// Save Data
 		private void MediaLibraryForm_FormClosing(object sender, FormClosingEventArgs e)
 		{
-			// Save Node Tree here
-
+			_nodes.Clear();
+			SaveNodeData(mediaTreeview.Nodes);
+			Save_MediaLibraryFile();
 		}
+
+		public void Save_MediaLibraryFile()
+		{
+			var xmlsettings = new XmlWriterSettings
+			{
+				Indent = true,
+				IndentChars = "\t",
+			};
+
+			DataContractSerializer dataSer = new DataContractSerializer(typeof(Dictionary<string, string>));
+			var dataWriter = XmlWriter.Create(_mediaFilePath, xmlsettings);
+			dataSer.WriteObject(dataWriter, _nodes);
+			dataWriter.Close();
+		}
+
+		private void SaveNodeData(TreeNodeCollection Nodes)
+		{
+			foreach (TreeNode node in Nodes)
+			{
+				if (node.Tag.ToString() != "Root")
+				{
+					if(node.Parent.Tag.ToString() != "Folder")
+						_nodes.Add(node.Name, node.Tag.ToString());
+				}
+				SaveNodeData(node.Nodes);
+			}
+		}
+
 		#endregion
+
 	}
 }

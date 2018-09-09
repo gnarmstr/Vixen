@@ -170,8 +170,7 @@
 			this.mediaTreeview.UsingCustomDragCursor = false;
 			this.mediaTreeview.ItemDrag += new System.Windows.Forms.ItemDragEventHandler(this.mediaTreeview_ItemDrag);
 			this.mediaTreeview.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.mediaTreeview_Click);
-			this.mediaTreeview.MouseDown += new System.Windows.Forms.MouseEventHandler(this.mediaTreeview_MouseDown);
-			this.mediaTreeview.MouseMove += new System.Windows.Forms.MouseEventHandler(this.mediaTreeview_MouseMove);
+			this.mediaTreeview.MouseEnter += new System.EventHandler(this.mediaTreeview_MouseEnter);
 			// 
 			// panel1
 			// 
