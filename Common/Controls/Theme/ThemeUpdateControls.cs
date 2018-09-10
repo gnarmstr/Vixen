@@ -123,7 +123,16 @@ namespace Common.Controls.Theme
 				}
 				if (c is ListBox | c is ListView | c is MultiSelectTreeview)
 				{
-					c.BackColor = ThemeColorTable.ListBoxBackColor;
+					if (c.TopLevelControl != null && c.TopLevelControl.Text == @"Media Library")
+					{
+						c.BackColor = ThemeColorTable.BackgroundColor;
+						MultiSelectTreeview mediaLibrary = c as MultiSelectTreeview;
+						mediaLibrary.LineColor = ThemeColorTable.ForeColor;
+					}
+					else
+					{
+						c.BackColor = ThemeColorTable.ListBoxBackColor;
+					}
 					c.ForeColor = ThemeColorTable.ForeColor;
 				}
 				if (c.ToString().Contains("NumericUpDown"))

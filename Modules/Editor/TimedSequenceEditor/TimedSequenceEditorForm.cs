@@ -1092,7 +1092,7 @@ namespace VixenModules.Editor.TimedSequenceEditor
 					return _mediaLibrary;
 				}
 
-				_mediaLibrary = new MediaLibraryForm(TimelineControl);
+				_mediaLibrary = new MediaLibraryForm();
 
 				return _mediaLibrary;
 			}

@@ -224,7 +224,6 @@ namespace VixenModules.Editor.TimedSequenceEditor
 			this.toolStripAudio.SuspendLayout();
 			this.contextMenuStripAll.SuspendLayout();
 			this.toolStripMenuItemMediaLibrary = new System.Windows.Forms.ToolStripMenuItem();
-			this.toolStripOperations.SuspendLayout();
 			this.menuStrip.SuspendLayout();
 			this.statusStrip.SuspendLayout();
 			this.toolStripContainer.ContentPanel.SuspendLayout();

@@ -36,17 +36,19 @@
 			System.Windows.Forms.TreeNode treeNode5 = new System.Windows.Forms.TreeNode("Glediator");
 			System.Windows.Forms.TreeNode treeNode6 = new System.Windows.Forms.TreeNode("Folders");
 			System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MediaLibraryForm));
-			this.toolTipFindEffects = new System.Windows.Forms.ToolTip(this.components);
 			this.contextMenuStripMedia = new System.Windows.Forms.ContextMenuStrip(this.components);
 			this.toolStripMenuItemAddMediaFolder = new System.Windows.Forms.ToolStripMenuItem();
 			this.toolStripMenuItemAddMediaFiles = new System.Windows.Forms.ToolStripMenuItem();
+			this.collapseAllToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.removeToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+			this.openFileLocationToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
 			this.pictureBox = new System.Windows.Forms.PictureBox();
 			this.labelFrame = new System.Windows.Forms.Label();
-			this.frameValue = new Common.Controls.ControlsEx.ValueControls.HValueScrollBar();
-			this.mediaTreeview = new Common.Controls.MultiSelectTreeview();
 			this.panel1 = new System.Windows.Forms.Panel();
 			this.panel2 = new System.Windows.Forms.Panel();
+			this.toolTipMediaNodes = new System.Windows.Forms.ToolTip(this.components);
+			this.mediaTreeview = new Common.Controls.MultiSelectTreeview();
+			this.frameValue = new Common.Controls.ControlsEx.ValueControls.HValueScrollBar();
 			this.contextMenuStripMedia.SuspendLayout();
 			((System.ComponentModel.ISupportInitialize)(this.pictureBox)).BeginInit();
 			this.panel1.SuspendLayout();
@@ -59,30 +61,47 @@
 			this.contextMenuStripMedia.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.toolStripMenuItemAddMediaFolder,
             this.toolStripMenuItemAddMediaFiles,
-            this.removeToolStripMenuItem});
+            this.collapseAllToolStripMenuItem,
+            this.removeToolStripMenuItem,
+            this.openFileLocationToolStripMenuItem});
 			this.contextMenuStripMedia.Name = "contextMenuStrip1";
-			this.contextMenuStripMedia.Size = new System.Drawing.Size(199, 76);
+			this.contextMenuStripMedia.Size = new System.Drawing.Size(257, 124);
+			this.contextMenuStripMedia.Opening += new System.ComponentModel.CancelEventHandler(this.contextMenuStripMedia_Opening);
 			// 
 			// toolStripMenuItemAddMediaFolder
 			// 
 			this.toolStripMenuItemAddMediaFolder.Name = "toolStripMenuItemAddMediaFolder";
-			this.toolStripMenuItemAddMediaFolder.Size = new System.Drawing.Size(198, 24);
+			this.toolStripMenuItemAddMediaFolder.Size = new System.Drawing.Size(256, 24);
 			this.toolStripMenuItemAddMediaFolder.Text = "Add Media Folder";
 			this.toolStripMenuItemAddMediaFolder.Click += new System.EventHandler(this.toolStripMenuItemAddMediaFolder_Click);
 			// 
 			// toolStripMenuItemAddMediaFiles
 			// 
 			this.toolStripMenuItemAddMediaFiles.Name = "toolStripMenuItemAddMediaFiles";
-			this.toolStripMenuItemAddMediaFiles.Size = new System.Drawing.Size(198, 24);
-			this.toolStripMenuItemAddMediaFiles.Text = "Add Media Files";
+			this.toolStripMenuItemAddMediaFiles.Size = new System.Drawing.Size(256, 24);
+			this.toolStripMenuItemAddMediaFiles.Text = "Add Media File(s)";
 			this.toolStripMenuItemAddMediaFiles.Click += new System.EventHandler(this.toolStripMenuItemAddMediaFiles_Click);
+			// 
+			// collapseAllToolStripMenuItem
+			// 
+			this.collapseAllToolStripMenuItem.Name = "collapseAllToolStripMenuItem";
+			this.collapseAllToolStripMenuItem.Size = new System.Drawing.Size(256, 24);
+			this.collapseAllToolStripMenuItem.Text = "Collapse All";
+			this.collapseAllToolStripMenuItem.Click += new System.EventHandler(this.collapseAllToolStripMenuItem_Click);
 			// 
 			// removeToolStripMenuItem
 			// 
 			this.removeToolStripMenuItem.Name = "removeToolStripMenuItem";
-			this.removeToolStripMenuItem.Size = new System.Drawing.Size(198, 24);
+			this.removeToolStripMenuItem.Size = new System.Drawing.Size(256, 24);
 			this.removeToolStripMenuItem.Text = "Remove";
 			this.removeToolStripMenuItem.Click += new System.EventHandler(this.removeToolStripMenuItem_Click);
+			// 
+			// openFileLocationToolStripMenuItem
+			// 
+			this.openFileLocationToolStripMenuItem.Name = "openFileLocationToolStripMenuItem";
+			this.openFileLocationToolStripMenuItem.Size = new System.Drawing.Size(256, 24);
+			this.openFileLocationToolStripMenuItem.Text = "Open selected file location";
+			this.openFileLocationToolStripMenuItem.Click += new System.EventHandler(this.openFileLocationToolStripMenuItem_Click);
 			// 
 			// pictureBox
 			// 
@@ -90,9 +109,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.pictureBox.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
 			this.pictureBox.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-			this.pictureBox.Location = new System.Drawing.Point(24, 6);
+			this.pictureBox.Location = new System.Drawing.Point(3, 0);
 			this.pictureBox.Name = "pictureBox";
-			this.pictureBox.Size = new System.Drawing.Size(100, 100);
+			this.pictureBox.Size = new System.Drawing.Size(142, 106);
 			this.pictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
 			this.pictureBox.TabIndex = 3;
 			this.pictureBox.TabStop = false;
@@ -108,20 +127,26 @@
 			this.labelFrame.Text = "Frame:";
 			this.labelFrame.Visible = false;
 			// 
-			// frameValue
+			// panel1
 			// 
-			this.frameValue.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-			this.frameValue.Location = new System.Drawing.Point(12, 130);
-			this.frameValue.Maximum = 1000;
-			this.frameValue.Minimum = 1;
-			this.frameValue.Name = "frameValue";
-			this.frameValue.Size = new System.Drawing.Size(124, 23);
-			this.frameValue.TabIndex = 4;
-			this.frameValue.Text = "hValueScrollBar1";
-			this.frameValue.Value = 1;
-			this.frameValue.Visible = false;
-			this.frameValue.ValueChanged += new Common.Controls.ControlsEx.ValueControls.ValueChangedEH(this.frameValue_ValueChanged);
+			this.panel1.Controls.Add(this.pictureBox);
+			this.panel1.Controls.Add(this.frameValue);
+			this.panel1.Controls.Add(this.labelFrame);
+			this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
+			this.panel1.Location = new System.Drawing.Point(0, 118);
+			this.panel1.Name = "panel1";
+			this.panel1.Size = new System.Drawing.Size(148, 165);
+			this.panel1.TabIndex = 6;
+			// 
+			// panel2
+			// 
+			this.panel2.AllowDrop = true;
+			this.panel2.Controls.Add(this.mediaTreeview);
+			this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
+			this.panel2.Location = new System.Drawing.Point(0, 0);
+			this.panel2.Name = "panel2";
+			this.panel2.Size = new System.Drawing.Size(148, 118);
+			this.panel2.TabIndex = 7;
 			// 
 			// mediaTreeview
 			// 
@@ -130,9 +155,8 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
 			this.mediaTreeview.ContextMenuStrip = this.contextMenuStripMedia;
-			this.mediaTreeview.CustomDragCursor = null;
-			this.mediaTreeview.DragDefaultMode = ((System.Windows.Forms.DragDropEffects)(((System.Windows.Forms.DragDropEffects.Copy | System.Windows.Forms.DragDropEffects.Move) 
-            | System.Windows.Forms.DragDropEffects.Scroll)));
+			this.mediaTreeview.CustomDragCursor = System.Windows.Forms.Cursors.Cross;
+			this.mediaTreeview.DragDefaultMode = System.Windows.Forms.DragDropEffects.Move;
 			this.mediaTreeview.DragDestinationNodeBackColor = System.Drawing.SystemColors.Highlight;
 			this.mediaTreeview.DragDestinationNodeForeColor = System.Drawing.SystemColors.HighlightText;
 			this.mediaTreeview.DragSourceNodeBackColor = System.Drawing.SystemColors.ControlLight;
@@ -165,6 +189,7 @@
             treeNode5,
             treeNode6});
 			this.mediaTreeview.SelectedNodes = ((System.Collections.Generic.List<System.Windows.Forms.TreeNode>)(resources.GetObject("mediaTreeview.SelectedNodes")));
+			this.mediaTreeview.ShowNodeToolTips = true;
 			this.mediaTreeview.Size = new System.Drawing.Size(142, 109);
 			this.mediaTreeview.TabIndex = 1;
 			this.mediaTreeview.UsingCustomDragCursor = false;
@@ -172,28 +197,24 @@
 			this.mediaTreeview.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.mediaTreeview_Click);
 			this.mediaTreeview.MouseEnter += new System.EventHandler(this.mediaTreeview_MouseEnter);
 			// 
-			// panel1
+			// frameValue
 			// 
-			this.panel1.Controls.Add(this.pictureBox);
-			this.panel1.Controls.Add(this.frameValue);
-			this.panel1.Controls.Add(this.labelFrame);
-			this.panel1.Dock = System.Windows.Forms.DockStyle.Bottom;
-			this.panel1.Location = new System.Drawing.Point(0, 118);
-			this.panel1.Name = "panel1";
-			this.panel1.Size = new System.Drawing.Size(148, 165);
-			this.panel1.TabIndex = 6;
-			// 
-			// panel2
-			// 
-			this.panel2.Controls.Add(this.mediaTreeview);
-			this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-			this.panel2.Location = new System.Drawing.Point(0, 0);
-			this.panel2.Name = "panel2";
-			this.panel2.Size = new System.Drawing.Size(148, 118);
-			this.panel2.TabIndex = 7;
+			this.frameValue.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+			this.frameValue.Location = new System.Drawing.Point(12, 130);
+			this.frameValue.Maximum = 1000;
+			this.frameValue.Minimum = 1;
+			this.frameValue.Name = "frameValue";
+			this.frameValue.Size = new System.Drawing.Size(124, 23);
+			this.frameValue.TabIndex = 4;
+			this.frameValue.Text = "hValueScrollBar1";
+			this.frameValue.Value = 1;
+			this.frameValue.Visible = false;
+			this.frameValue.ValueChanged += new Common.Controls.ControlsEx.ValueControls.ValueChangedEH(this.frameValue_ValueChanged);
 			// 
 			// MediaLibraryForm
 			// 
+			this.AllowDrop = true;
 			this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
@@ -219,7 +240,6 @@
 		}
 
 		#endregion
-		private System.Windows.Forms.ToolTip toolTipFindEffects;
 		private System.Windows.Forms.ContextMenuStrip contextMenuStripMedia;
 		private System.Windows.Forms.ToolStripMenuItem toolStripMenuItemAddMediaFolder;
 		private Common.Controls.MultiSelectTreeview mediaTreeview;
@@ -230,5 +250,8 @@
 		private System.Windows.Forms.ToolStripMenuItem removeToolStripMenuItem;
 		private System.Windows.Forms.Panel panel1;
 		private System.Windows.Forms.Panel panel2;
+		private System.Windows.Forms.ToolTip toolTipMediaNodes;
+		private System.Windows.Forms.ToolStripMenuItem openFileLocationToolStripMenuItem;
+		private System.Windows.Forms.ToolStripMenuItem collapseAllToolStripMenuItem;
 	}
 }
