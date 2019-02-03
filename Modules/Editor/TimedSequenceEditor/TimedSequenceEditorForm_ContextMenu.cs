@@ -8,6 +8,8 @@ using Common.Controls.Timeline;
 using Common.Resources.Properties;
 using Vixen.Module.Effect;
 using Vixen.Services;
+using Vixen.Sys;
+using VixenModules.App.ColorGradients;
 using VixenModules.Sequence.Timed;
 using Element = Common.Controls.Timeline.Element;
 using MarkCollection = VixenModules.App.Marks.MarkCollection;
@@ -393,6 +395,13 @@ namespace VixenModules.Editor.TimedSequenceEditor
 			}
 			#endregion
 
+			ToolStripMenuItem contextMenuItemMatchStartCurve = new ToolStripMenuItem("Match Start Curve", null, toolStripMenuItem_MatchStartCurve_Click)
+			{
+				Image = Resources.page_copy
+			};
+
+			_contextMenuStrip.Items.AddRange(new ToolStripItem[] { contextMenuItemMatchStartCurve });
+
 			#region Cut Copy Paste Section
 
 			_contextMenuStrip.Items.Add("-");
@@ -439,6 +448,30 @@ namespace VixenModules.Editor.TimedSequenceEditor
 			e.AutomaticallyHandleSelection = false;
 			_contextMenuStrip.Show(MousePosition);
 		}
-		
+
+		private void toolStripMenuItem_MatchStartCurve_Click(object sender, EventArgs e)
+		{
+			if (TimelineControl.SelectedElements.Any())
+			{
+				var effect = TimelineControl.SelectedElements.First();
+				int effectStartLocationX = (int)(effect.StartTime.Ticks / TimelineControl.TimePerPixel.Ticks);
+				bool firstHalf = _gridForm.TimelineControl.grid.mouseDownGridLocation.X - effectStartLocationX < effect.DisplayRect.Width / 2;
+
+				var effect1 = effect.EffectNode.Effect.DynamicCast<IEffect>().ParameterValues[0].DynamicCast<List<GradientLevelPair>>()[0].Curve.Points.Last();
+				var effect2 = TimelineControl.SelectedElements.Last();
+				var effect3 = effect2.EffectNode.Effect.DynamicCast<IEffect>().ParameterValues[0].DynamicCast<List<GradientLevelPair>>()[0].Curve.Points[0];
+				//	var effect2 = (effect1.ParameterValues[0]);
+				//.DynamicCast<GradientLevelPair>());//.DynamicCast<Curve>().Points[0].X;
+				//	var dedfe = effect1.DynamicCast<List<GradientLevelPair>>()[0].Curve.Points[0];
+				effect3.Y = effect1.Y;
+
+				effect.RenderElement();
+				effect2.RenderElement();
+				effect2.EffectNode.Effect.MarkDirty();
+
+				CheckAndRenderDirtyElementsAsync();
+			}
+		}
+
 	}
 }

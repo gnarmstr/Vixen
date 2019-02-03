@@ -16,7 +16,7 @@ namespace Common.Controls.Timeline
 		public bool _beginEffectDraw;
 		private TimeSpan effectDrawMouseDownTime;
 		private TimeSpan effectDrawMouseUpTime;
-		private Point mouseDownGridLocation, mouseUpGridLocation;
+		public Point mouseDownGridLocation, mouseUpGridLocation;
 
 		#region General Mouse Event-Related
 
