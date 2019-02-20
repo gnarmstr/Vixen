@@ -24,6 +24,8 @@ namespace VixenModules.Effect.Bars
 			LevelCurve = new Curve(new PointPairList(new[] { 0.0, 100.0 }, new[] { 100.0, 100.0 }));
 			SpeedCurve = new Curve(new PointPairList(new[] { 0.0, 100.0 }, new[] { 50.0, 50.0 }));
 			Orientation =StringOrientation.Vertical;
+			XOffsetCurve = new Curve(new PointPairList(new[] { 0.0, 100.0 }, new[] { 50.0, 50.0 }));
+			YOffsetCurve = new Curve(new PointPairList(new[] { 0.0, 100.0 }, new[] { 50.0, 50.0 }));
 		}
 
 		[DataMember]
@@ -56,6 +58,12 @@ namespace VixenModules.Effect.Bars
 		[DataMember]
 		public StringOrientation Orientation { get; set; }
 
+		[DataMember]
+		public Curve XOffsetCurve { get; set; }
+
+		[DataMember]
+		public Curve YOffsetCurve { get; set; }
+
 		[OnDeserialized]
 		public void OnDeserialized(StreamingContext c)
 		{
@@ -64,6 +72,12 @@ namespace VixenModules.Effect.Bars
 			if (SpeedCurve == null)
 			{
 				SpeedCurve = new Curve(new PointPairList(new[] { 0.0, 100.0 }, new[] { 50.0, 50.0 }));
+			}
+
+			if (XOffsetCurve == null)
+			{
+				XOffsetCurve = new Curve(new PointPairList(new[] { 0.0, 100.0 }, new[] { 50.0, 50.0 }));
+				YOffsetCurve = new Curve(new PointPairList(new[] { 0.0, 100.0 }, new[] { 50.0, 50.0 }));
 			}
 		}
 
@@ -80,7 +94,9 @@ namespace VixenModules.Effect.Bars
 				MovementType = MovementType,
 				Highlight = Highlight,
 				LevelCurve = new Curve(LevelCurve),
-				SpeedCurve = new Curve(SpeedCurve)
+				SpeedCurve = new Curve(SpeedCurve),
+				YOffsetCurve = new Curve(YOffsetCurve),
+				XOffsetCurve = new Curve(XOffsetCurve)
 			};
 			return result;
 		}
