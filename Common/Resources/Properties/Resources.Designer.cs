@@ -743,6 +743,26 @@ namespace Common.Resources.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        public static System.Drawing.Bitmap buttonFlipHorizontal_BackgroundImage {
+            get {
+                object obj = ResourceManager.GetObject("buttonFlipHorizontal_BackgroundImage", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        public static System.Drawing.Bitmap buttonFlipVertical_BackgroundImage {
+            get {
+                object obj = ResourceManager.GetObject("buttonFlipVertical_BackgroundImage", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         public static System.Drawing.Bitmap buttonMatchProperties_BackgroundImage {
             get {
                 object obj = ResourceManager.GetObject("buttonMatchProperties_BackgroundImage", resourceCulture);

@@ -91,6 +91,8 @@ namespace VixenModules.Preview.VixenPreview
 			buttonDistributeHorizontal.Image = Tools.GetIcon(Resources.buttonDistributeHorizontal_BackgroundImage, iconSize);
 			buttonDistributeVertical.Image = Tools.GetIcon(Resources.buttonDistributeVertical_BackgroundImage, iconSize);
 			buttonMatchProperties.Image = Tools.GetIcon(Resources.buttonMatchProperties_BackgroundImage, iconSize);
+			buttonFlipVertical.Image = Tools.GetIcon(Resources.buttonFlipVertical_BackgroundImage, iconSize);
+			buttonFlipHorizontal.Image = Tools.GetIcon(Resources.buttonFlipHorizontal_BackgroundImage, iconSize);
 
 			buttonAlignLeft.Text = string.Empty;
 			buttonAlignBottom.Text = string.Empty;
@@ -101,6 +103,8 @@ namespace VixenModules.Preview.VixenPreview
 			buttonDistributeHorizontal.Text = string.Empty;
 			buttonDistributeVertical.Text = string.Empty;
 			buttonMatchProperties.Text = string.Empty;
+			buttonFlipVertical.Text = string.Empty;
+			buttonFlipHorizontal.Text = string.Empty;
 
 			tlpToolBar.BorderStyle = BorderStyle.FixedSingle;
 			ThemeUpdateControls.UpdateControls(this);
@@ -241,7 +245,9 @@ namespace VixenModules.Preview.VixenPreview
 		    buttonAlignVertMid.Enabled = multiSelect;
 		    buttonDistributeHorizontal.Enabled = buttonDistributeVertical.Enabled = multiSelect;
 		    buttonMatchProperties.Enabled = multiSelect;
-	    }
+		    buttonFlipHorizontal.Enabled = true;
+		    buttonFlipVertical.Enabled = true;
+		}
 
 	    private void VixenPreviewSetup3_ChangeZoomLevel(object sender, double zoomLevel) 
         {
@@ -418,6 +424,14 @@ namespace VixenModules.Preview.VixenPreview
             else if (button == buttonMatchProperties)
             {
                 previewForm.Preview.MatchProperties();
+			}
+			else if (button == buttonFlipHorizontal)
+            {
+	            previewForm.Preview.FlipHorizontal();
+			}
+			else if (button == buttonFlipVertical)
+            {
+	            previewForm.Preview.FlipVertical();
             }
 
 			PreviewItemsAlignNew(this, new PreviewItemMoveEventArgs(previewForm.Preview.m_previewItemResizeMoveInfo));

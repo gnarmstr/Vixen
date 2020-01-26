@@ -2288,7 +2288,108 @@ namespace VixenModules.Preview.VixenPreview
 
                 EndUpdate();
             }
-        }
+		}
+
+        public void FlipHorizontal()
+        {
+			// Find min and max X position
+			int max;
+			int min;
+
+			if (_selectedDisplayItem != null)
+			{
+				max = _selectedDisplayItem.Shape.Pixels.Max(element => Math.Abs(element.Point.X));
+				min = _selectedDisplayItem.Shape.Pixels.Min(element => Math.Abs(element.Point.X));
+
+				foreach (var pixel in _selectedDisplayItem.Shape.Pixels)
+				{
+					if (pixel.IsHighPrecision)
+					{
+						System.Windows.Point point = new System.Windows.Point(max - (pixel.Location.X - min),
+							pixel.Location.Y);
+						pixel.Location = point;
+					}
+					else
+					{
+						pixel.X = max - (pixel.X - min);
+					}
+				}
+			}
+			else if (SelectedDisplayItems.Count > 0)
+			{
+				foreach (DisplayItem selectedItem in _selectedDisplayItems)
+				{
+					max = selectedItem.Shape.Pixels.Max(element => Math.Abs(element.Point.X));
+					min = selectedItem.Shape.Pixels.Min(element => Math.Abs(element.Point.X));
+
+					foreach (var pixel in selectedItem.Shape.Pixels)
+					{
+						if (pixel.IsHighPrecision)
+						{
+							System.Windows.Point point = new System.Windows.Point(max - (pixel.Location.X - min),
+								pixel.Location.Y);
+							pixel.Location = point;
+						}
+						else
+						{
+							pixel.X = max - (pixel.X - min);
+						}
+					}
+				}
+			}
+
+			EndUpdate();
+		}
+
+        public void FlipVertical()
+		{
+			// Find min and max Y position
+			int max;
+			int min;
+
+			if (_selectedDisplayItem != null)
+			{
+				max = _selectedDisplayItem.Shape.Pixels.Max(element => Math.Abs(element.Point.Y));
+				min = _selectedDisplayItem.Shape.Pixels.Min(element => Math.Abs(element.Point.Y));
+
+				foreach (var pixel in _selectedDisplayItem.Shape.Pixels)
+				{
+					if (pixel.IsHighPrecision)
+					{
+						System.Windows.Point point = new System.Windows.Point(pixel.Location.X, max - (pixel.Location.Y - min));
+						pixel.Location = point;
+					}
+					else
+					{
+						pixel.Y = max - (pixel.Y - min);
+					}
+				}
+			}
+			else if (SelectedDisplayItems.Count > 0)
+			{
+				foreach (DisplayItem selectedItem in _selectedDisplayItems)
+				{
+					max = selectedItem.Shape.Pixels.Max(element => Math.Abs(element.Point.Y));
+					min = selectedItem.Shape.Pixels.Min(element => Math.Abs(element.Point.Y));
+
+					foreach (var pixel in selectedItem.Shape.Pixels)
+					{
+						if (pixel.IsHighPrecision)
+						{
+							System.Windows.Point point = new System.Windows.Point(pixel.Location.X, max - (pixel.Location.Y - min));
+							pixel.Location = point;
+						}
+						else
+						{
+							pixel.Y = max - (pixel.Y - min);
+						}
+					}
+				}
+			}
+
+			EndUpdate();
+
+		}
 
 		#endregion
 
@@ -2466,7 +2567,6 @@ namespace VixenModules.Preview.VixenPreview
 			PreviewItemPixelSizeChangeUndoAction action = new PreviewItemPixelSizeChangeUndoAction(this, displayItems, info);
 			UndoManager.AddUndoAction(action);
 		}
-		
 	}
 
 	#endregion
