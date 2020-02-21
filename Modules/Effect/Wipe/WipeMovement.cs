@@ -10,6 +10,8 @@ namespace VixenModules.Effect.Wipe
 		[Description("Pulse Length")]
 		PulseLength,
 		[Description("Movement")]
-		Movement
+		Movement,
+		[Description("Audio")]
+		Audio
 	}
 }

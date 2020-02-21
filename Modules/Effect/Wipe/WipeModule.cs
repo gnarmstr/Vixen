@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading;
 using Vixen.Attributes;
 using Vixen.Module;
+using Vixen.Module.Media;
 using Vixen.Sys;
 using Vixen.Sys.Attribute;
 using VixenModules.App.ColorGradients;
@@ -15,18 +16,13 @@ using VixenModules.Effect.Pulse;
 using VixenModules.EffectEditor.EffectDescriptorAttributes;
 using VixenModules.Property.Location;
 using ZedGraph;
+using VixenModules.Media.Audio;
 
 namespace VixenModules.Effect.Wipe
 {
 	public class WipeModule : BaseEffect
 	{
-		public WipeModule()
-		{
-			_data = new WipeData();
-			UpdateAttributes();
-		}
-
-		private WipeData _data; 
+		private WipeData _data;
 		private EffectIntents _elementData = null;
 		private readonly int _timeInterval = 50;
 		private int _maxX;
@@ -39,6 +35,18 @@ namespace VixenModules.Effect.Wipe
 		private int _bufferHeight;
 		private int _pulsePercent;
 		private int _steps;
+		private readonly AudioUtilities _audioUtilities;
+		private const int Spacing = 50;
+
+		public WipeModule()
+		{
+			_data = new WipeData();
+			_audioUtilities = new AudioUtilities();
+			UpdateAttributes();
+		}
+
+		[Browsable(false)]
+		private AudioUtilities AudioUtilities { get { return _audioUtilities; } }
 
 		protected override void TargetNodesChanged()
 		{
@@ -48,7 +56,7 @@ namespace VixenModules.Effect.Wipe
 		protected override void _PreRender(CancellationTokenSource tokenSource = null)
 		{
 			_elementData = new EffectIntents();
-
+			
 			List<IElementNode[]> renderNodes = new List<IElementNode[]>();
 			List<Tuple<IElementNode, int, int, int>> renderedNodes = TargetNodes.SelectMany(x => x.GetLeafEnumerator())
 				.Select(s =>
@@ -105,6 +113,7 @@ namespace VixenModules.Effect.Wipe
 					RenderPulseLength(renderNodes, tokenSource);
 					break;
 				case WipeMovement.Movement:
+				case WipeMovement.Audio:
 					RenderMovement(renderNodes, tokenSource);
 					break;
 			}
@@ -119,7 +128,7 @@ namespace VixenModules.Effect.Wipe
 			int steps = GetMaxSteps(centerPoint);
 
 			_pulsePercent = (int) (_bufferWidth * (PulsePercent / 100));
-			if (WipeMovement == WipeMovement.Movement) steps += _pulsePercent;
+			if (WipeMovement >= WipeMovement.Movement) steps += _pulsePercent;
 
 			for (int i = 0; i <= steps; i++)
 			{
@@ -132,7 +141,7 @@ namespace VixenModules.Effect.Wipe
 				groups.Add(new Tuple<int, IElementNode[]>(i, elements.ToArray()));
 
 			}
-			return !ReverseDirection || WipeMovement == WipeMovement.Movement
+			return !ReverseDirection || WipeMovement >= WipeMovement.Movement
 				? groups.OrderBy(o => o.Item1).Select(s => s.Item2).ToList()
 				: groups.OrderByDescending(o => o.Item1).Select(s => s.Item2).ToList();
 		}
@@ -152,7 +161,7 @@ namespace VixenModules.Effect.Wipe
 			yOffset = (int)(Math.Round(ScaleCurveToValue(yOffset, _bufferHeight, -_bufferHeight)) / 2);
 
 			_pulsePercent = (int)(_bufferWidth * (PulsePercent / 100));
-			if (WipeMovement == WipeMovement.Movement) steps += _pulsePercent;
+			if (WipeMovement >= WipeMovement.Movement) steps += _pulsePercent;
 			
 			for (int i = 0; i <= steps; i++)
 			{
@@ -183,7 +192,7 @@ namespace VixenModules.Effect.Wipe
 				}
 				groups.Add(new Tuple<int, IElementNode[]>(i, elements.ToArray()));
 			}
-			return !ReverseDirection || WipeMovement == WipeMovement.Movement
+			return !ReverseDirection || WipeMovement >= WipeMovement.Movement
 				? groups.OrderBy(o => o.Item1).Select(s => s.Item2).ToList()
 				: groups.OrderByDescending(o => o.Item1).Select(s => s.Item2).ToList();
 
@@ -204,7 +213,7 @@ namespace VixenModules.Effect.Wipe
 			yOffset = (int)Math.Round(ScaleCurveToValue(yOffset, _bufferHeight, -_bufferHeight)) / 2;
 
 			_pulsePercent = (int)(_bufferWidth * (PulsePercent / 100));
-			if (WipeMovement == WipeMovement.Movement) steps += _pulsePercent;
+			if (WipeMovement >= WipeMovement.Movement) steps += _pulsePercent;
 
 			for (int i = 0; i <= steps; i++)
 			{
@@ -225,7 +234,7 @@ namespace VixenModules.Effect.Wipe
 				groups.Add(new Tuple<int, IElementNode[]>(i, elements.ToArray()));
 			}
 
-			return !ReverseDirection || WipeMovement == WipeMovement.Movement
+			return !ReverseDirection || WipeMovement >= WipeMovement.Movement
 				? groups.OrderBy(o => o.Item1).Select(s => s.Item2).ToList()
 				: groups.OrderByDescending(o => o.Item1).Select(s => s.Item2).ToList();
 		}
@@ -235,14 +244,14 @@ namespace VixenModules.Effect.Wipe
 			List<Tuple<int, IElementNode[]>> groups = new List<Tuple<int, IElementNode[]>>();
 			_steps = (int)(Math.Sqrt(Math.Pow(_bufferWidth, 2) + Math.Pow(_bufferHeight, 2))*1.41);
 			_pulsePercent = (int)(_bufferWidth * (PulsePercent / 100));
-			if (WipeMovement == WipeMovement.Movement) _steps += _pulsePercent;
+			if (WipeMovement >= WipeMovement.Movement) _steps += _pulsePercent;
 
 			for (int i = 0; i <= _steps; i++)
 			{
 				List<IElementNode> elements = new List<IElementNode>();
 				foreach (Tuple<IElementNode, int, int, int> node in renderedNodes)
 				{
-					if (ReverseDirection || WipeMovement == WipeMovement.Movement)
+					if (ReverseDirection || WipeMovement >= WipeMovement.Movement)
 					{
 						if (Direction == WipeDirection.DiagonalUp)
 						{
@@ -292,7 +301,7 @@ namespace VixenModules.Effect.Wipe
 					break;
 			}
 			
-			if (WipeMovement == WipeMovement.Movement) _steps += _pulsePercent;
+			if (WipeMovement >= WipeMovement.Movement) _steps += _pulsePercent;
 			
 			for (int i = 0; i <= _steps; i++)
 			{
@@ -318,7 +327,7 @@ namespace VixenModules.Effect.Wipe
 				groups.Add(new Tuple<int, IElementNode[]>(i, elements.ToArray()));
 			}
 
-			return ReverseDirection || WipeMovement == WipeMovement.Movement
+			return ReverseDirection || WipeMovement >= WipeMovement.Movement
 				? groups.OrderBy(o => o.Item1).Select(s => s.Item2).ToList()
 				: groups.OrderByDescending(o => o.Item1).Select(s => s.Item2).ToList();
 		}
@@ -529,18 +538,41 @@ namespace VixenModules.Effect.Wipe
 			int intervals = Convert.ToInt32(Math.Ceiling(TimeSpan.TotalMilliseconds / _timeInterval));
 			int burst = Direction != WipeDirection.DiagonalUp ? 0 : _pulsePercent - 1;
 
+			if (WipeMovement == WipeMovement.Audio)
+			{
+				GetAudioSettings();
+				UpdateAudioAttributes();
+			}
+
 			List<WipeClass> renderElements = new List<WipeClass>();
 			for (int i = 0; i < intervals; i++)
 			{
-				double position = (double)100 / intervals * i;
-				double movement = MovementCurve.GetValue(position) / 100;
+				double position = (double) 100 / intervals * i;
+				
+				double movement = 0;
+				if (WipeMovement == WipeMovement.Audio)
+				{
+					var currentValue = _audioUtilities.VolumeAtTime(i * Spacing);
+					if (currentValue > ((double) Sensitivity / 10))
+					{
+						movement = ReverseDirection
+							? 1 + ScaleCurveToValue(currentValue, 1, 0) * 10
+							: -ScaleCurveToValue(currentValue, 1, 0) * 10;
+					}
+				}
+				else
+				{
+					movement = MovementCurve.GetValue(position) / 100;
+				}
+
 				if (previousMovement != movement)
 				{
-					if (renderElements.Count > 0) renderElements.Last().Duration = startTime - renderElements.Last().StartTime;
+					if (renderElements.Count > 0)
+						renderElements.Last().Duration = startTime - renderElements.Last().StartTime;
 
 					WipeClass wc = new WipeClass
 					{
-						ElementIndex = (int)((renderNodes.Count - 1) * movement),
+						ElementIndex = (int) ((renderNodes.Count - 1) * movement),
 						StartTime = startTime,
 						Duration = TimeSpan - startTime
 					};
@@ -556,6 +588,7 @@ namespace VixenModules.Effect.Wipe
 				previousMovement = movement;
 				startTime += timeInterval;
 			}
+
 			double pos = ((double)100 / _pulsePercent) / 100;
 			// Now render element
 			foreach (var wipeNode in renderElements)
@@ -595,6 +628,25 @@ namespace VixenModules.Effect.Wipe
 			steps = Math.Max((int)(DistanceFromPoint(new Point(_maxX, _minY), centerPoint)), steps);
 			steps = Math.Max((int)(DistanceFromPoint(new Point(_minX, _minY), centerPoint)), steps);
 			return Math.Max((int)(DistanceFromPoint(new Point(_minX, _maxY), centerPoint)), steps);
+		}
+
+		private void GetAudioSettings()
+		{
+			if (Media != null)
+				foreach (IMediaModuleInstance module in Media)
+				{
+					var audio = module as Audio;
+					if (audio != null)
+					{
+						if (audio.Channels == 0)
+						{
+							continue;
+						}
+						_audioUtilities.TimeSpan = TimeSpan;
+						_audioUtilities.StartTime = StartTime;
+						_audioUtilities.ReloadAudio(audio);
+					}
+				}
 		}
 
 		private class WipeClass
@@ -847,6 +899,7 @@ namespace VixenModules.Effect.Wipe
 				IsDirty = true;
 				OnPropertyChanged();
 				UpdateAttributes();
+				UpdateAudioAttributes();
 				TypeDescriptor.Refresh(this);
 
 			}
@@ -900,6 +953,172 @@ namespace VixenModules.Effect.Wipe
 			}
 		}
 
+		#region Audio
+
+		[Value]
+		[ProviderCategory(@"Audio", 2)]
+		[ProviderDisplayName(@"Volume Sensitivity")]
+		[ProviderDescription(@"The range of the volume levels displayed by the effect")]
+		[PropertyEditor("SliderEditor")]
+		[NumberRange(-200, 0, 1)]
+		[PropertyOrder(0)]
+		public int Sensitivity
+		{
+			get { return _data.Sensitivity; }
+			set
+			{
+				_data.Sensitivity = value;
+				IsDirty = true;
+				OnPropertyChanged();
+			}
+		}
+
+		[Value]
+		[ProviderCategory(@"Audio", 2)]
+		[ProviderDisplayName(@"Gain")]
+		[ProviderDescription(@"Boosts the volume")]
+		[PropertyEditor("SliderEditor")]
+		[NumberRange(0, 200, .5)]
+		[PropertyOrder(1)]
+		public int Gain
+		{
+			get { return _data.Gain * 10; }
+			set
+			{
+				_data.Gain = value / 10;
+				_audioUtilities.Gain = value / 10;
+				IsDirty = true;
+				OnPropertyChanged();
+			}
+		}
+
+		[Value]
+		[ProviderCategory(@"Audio", 2)]
+		[ProviderDisplayName(@"HighPassFilter")]
+		[ProviderDescription(@"Ignores frequencies below a given frequency")]
+		[PropertyOrder(2)]
+		public bool HighPass
+		{
+			get { return _data.HighPass; }
+			set
+			{
+				_data.HighPass = value;
+				_audioUtilities.HighPass = value;
+				IsDirty = true;
+				UpdateLowHighPassAttributes();
+				OnPropertyChanged();
+			}
+		}
+
+		[Value]
+		[ProviderCategory(@"Audio", 2)]
+		[ProviderDisplayName(@"HighPassFrequency")]
+		[ProviderDescription(@"Ignore frequencies below this value")]
+		[PropertyOrder(3)]
+		public int HighPassFreq
+		{
+			get { return _data.HighPassFreq; }
+			set
+			{
+				_data.HighPassFreq = value;
+				_audioUtilities.HighPassFreq = value;
+				IsDirty = true;
+				OnPropertyChanged();
+			}
+		}
+
+		[Value]
+		[ProviderCategory(@"Audio", 2)]
+		[ProviderDisplayName(@"LowPassFilter")]
+		[ProviderDescription(@"Ignores frequencies above a given frequency")]
+		[PropertyOrder(4)]
+		public bool LowPass
+		{
+			get { return _data.LowPass; }
+			set
+			{
+				_data.LowPass = value;
+				_audioUtilities.LowPass = value;
+				IsDirty = true;
+				UpdateLowHighPassAttributes();
+				OnPropertyChanged();
+			}
+		}
+
+		[Value]
+		[ProviderCategory(@"Audio", 2)]
+		[ProviderDisplayName(@"LowPassFrequency")]
+		[ProviderDescription(@"Ignore frequencies above this value")]
+		[PropertyOrder(5)]
+		public int LowPassFreq
+		{
+			get { return _data.LowPassFreq; }
+			set
+			{
+				_data.LowPassFreq = value;
+				_audioUtilities.LowPassFreq = value;
+				IsDirty = true;
+				OnPropertyChanged();
+			}
+		}
+
+
+		[Value]
+		[ProviderCategory(@"Audio", 2)]
+		[ProviderDescription(@"Brings the peak volume of the selected audio range to the top of the effect")]
+		[PropertyOrder(6)]
+		public bool Normalize
+		{
+			get { return _data.Normalize; }
+			set
+			{
+				_audioUtilities.Normalize = value;
+				_data.Normalize = value;
+				IsDirty = true;
+				OnPropertyChanged();
+			}
+		}
+
+		[Value]
+		[ProviderCategory(@"Audio", 2)]
+		[ProviderDisplayName(@"AttackTime")]
+		[ProviderDescription(@"How quickly the effect initially reacts to a volume peak")]
+		[PropertyEditor("SliderEditor")]
+		[NumberRange(0, 300, 10)]
+		[PropertyOrder(7)]
+		public int AttackTime
+		{
+			get { return _data.AttackTime; }
+			set
+			{
+				_data.AttackTime = value;
+				_audioUtilities.AttackTime = value;
+				IsDirty = true;
+				OnPropertyChanged();
+			}
+		}
+
+		[Value]
+		[ProviderCategory(@"Audio", 2)]
+		[ProviderDisplayName(@"DecayTime")]
+		[ProviderDescription(@"How quickly the effect falls from a volume peak")]
+		[PropertyEditor("SliderEditor")]
+		[NumberRange(1, 5000, 300)]
+		[PropertyOrder(8)]
+		public int DecayTime
+		{
+			get { return _data.DecayTime; }
+			set
+			{
+				_data.DecayTime = value;
+				_audioUtilities.DecayTime = value;
+				IsDirty = true;
+				OnPropertyChanged();
+			}
+		}
+
+		#endregion
+
 		[Value]
 		[ProviderCategory(@"Pulse",7)]
 		[ProviderDisplayName(@"PulsePercent")]
@@ -951,6 +1170,42 @@ namespace VixenModules.Effect.Wipe
 				{"XOffset",  Direction > (WipeDirection) 3}
 			};
 			SetBrowsable(propertyStates);
+		}
+
+		private void UpdateAudioAttributes(bool refresh = true)
+		{
+			Dictionary<string, bool> propertyStates = new Dictionary<string, bool>(10);
+			propertyStates.Add("Sensitivity", WipeMovement == WipeMovement.Audio && _audioUtilities.AudioLoaded);
+			propertyStates.Add("LowPass", WipeMovement == WipeMovement.Audio && _audioUtilities.AudioLoaded);
+			propertyStates.Add("LowPassFreq", WipeMovement == WipeMovement.Audio && _audioUtilities.AudioLoaded);
+			propertyStates.Add("HighPass", WipeMovement == WipeMovement.Audio && _audioUtilities.AudioLoaded);
+			propertyStates.Add("HighPassFreq", WipeMovement == WipeMovement.Audio && _audioUtilities.AudioLoaded);
+			propertyStates.Add("Range", WipeMovement == WipeMovement.Audio && _audioUtilities.AudioLoaded);
+			propertyStates.Add("Normalize", WipeMovement == WipeMovement.Audio && _audioUtilities.AudioLoaded);
+			propertyStates.Add("DecayTime", WipeMovement == WipeMovement.Audio && _audioUtilities.AudioLoaded);
+			propertyStates.Add("AttackTime", WipeMovement == WipeMovement.Audio && _audioUtilities.AudioLoaded);
+			propertyStates.Add("Gain", WipeMovement == WipeMovement.Audio && _audioUtilities.AudioLoaded);
+			SetBrowsable(propertyStates);
+			if (refresh)
+			{
+				TypeDescriptor.Refresh(this);
+			}
+
+			UpdateLowHighPassAttributes();
+		}
+
+		protected void UpdateLowHighPassAttributes(bool refresh = true)
+		{
+			Dictionary<string, bool> propertyStates = new Dictionary<string, bool>(2)
+			{
+				{"LowPassFreq", LowPass},
+				{"HighPassFreq", HighPass}
+			};
+			SetBrowsable(propertyStates);
+			if (refresh)
+			{
+				TypeDescriptor.Refresh(this);
+			}
 		}
 
 		#endregion

@@ -26,7 +26,17 @@ namespace VixenModules.Effect.Wipe {
 			ReverseColorDirection = true;
 			XOffset = 0.0;
 			YOffset = 0.0;
+			Sensitivity = -70;
+			LowPass = false;
+			LowPassFreq = 1000;
+			HighPass = false;
+			HighPassFreq = 500;
+			Normalize = true;
+			DecayTime = 1500;
+			AttackTime = 52;
+			Gain = 0;
 		}
+
 		[DataMember]
 		public ColorHandling ColorHandling { get; set; }
 
@@ -74,6 +84,39 @@ namespace VixenModules.Effect.Wipe {
 
 		[DataMember]
 		public double YOffset { get; set; }
+
+		[DataMember]
+		public int DecayTime { get; set; }
+
+		[DataMember(EmitDefaultValue = false)]
+		public bool EnableAudio { get; set; }
+
+		[DataMember]
+		public int Gain { get; set; }
+
+		[DataMember]
+		public int AttackTime { get; set; }
+
+		[DataMember]
+		public int Velocity { get; set; }
+
+		[DataMember]
+		public int Sensitivity { get; set; }
+
+		[DataMember]
+		public bool LowPass { get; set; }
+
+		[DataMember]
+		public int LowPassFreq { get; set; }
+
+		[DataMember]
+		public bool HighPass { get; set; }
+
+		[DataMember]
+		public int HighPassFreq { get; set; }
+
+		[DataMember]
+		public bool Normalize { get; set; }
 
 		protected override EffectTypeModuleData CreateInstanceForClone()
 		{

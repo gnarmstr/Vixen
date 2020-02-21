@@ -20,6 +20,11 @@ namespace VixenModules.Effect.Wipe {
 			get { return "Wipe"; }
 		}
 
+		public override bool SupportsMedia
+		{
+			get { return true; }
+		}
+
 		public override EffectGroups EffectGroup
 		{
 			get { return EffectGroups.Basic; }

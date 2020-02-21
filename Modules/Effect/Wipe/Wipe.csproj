@@ -37,6 +37,9 @@
       <Private>false</Private>
       <IncludeAssets>None</IncludeAssets>
     </ProjectReference>
+    <ProjectReference Include="..\..\Media\Audio\Audio.csproj">
+      <Private>false</Private>
+    </ProjectReference>
     <ProjectReference Include="..\..\Property\Location\Location.csproj">
       <Private>false</Private>
       <IncludeAssets>None</IncludeAssets>
