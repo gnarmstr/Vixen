@@ -25,6 +25,8 @@ namespace VixenModules.Effect.Wipe {
 			get { return true; }
 		}
 
+		public override bool SupportsMarks => true;
+
 		public override EffectGroups EffectGroup
 		{
 			get { return EffectGroups.Basic; }

@@ -1,4 +1,5 @@
-﻿using System.Runtime.Serialization;
+﻿using System;
+using System.Runtime.Serialization;
 using VixenModules.App.ColorGradients;
 using VixenModules.App.Curves;
 using System.Drawing;
@@ -117,6 +118,9 @@ namespace VixenModules.Effect.Wipe {
 
 		[DataMember]
 		public bool Normalize { get; set; }
+
+		[DataMember]
+		public Guid MarkCollectionId { get; set; }
 
 		protected override EffectTypeModuleData CreateInstanceForClone()
 		{

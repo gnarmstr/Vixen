@@ -5,10 +5,12 @@ using System.Drawing;
 using System.Linq;
 using System.Threading;
 using Vixen.Attributes;
+using Vixen.Marks;
 using Vixen.Module;
 using Vixen.Module.Media;
 using Vixen.Sys;
 using Vixen.Sys.Attribute;
+using Vixen.TypeConverters;
 using VixenModules.App.ColorGradients;
 using VixenModules.App.Curves;
 using VixenModules.Effect.Effect;
@@ -37,6 +39,8 @@ namespace VixenModules.Effect.Wipe
 		private int _steps;
 		private readonly AudioUtilities _audioUtilities;
 		private const int Spacing = 50;
+		private List<WipeAudioClass> _audioWipes;
+		private IEnumerable<IMark> _marks = null;
 
 		public WipeModule()
 		{
@@ -114,6 +118,7 @@ namespace VixenModules.Effect.Wipe
 					break;
 				case WipeMovement.Movement:
 				case WipeMovement.Audio:
+				case WipeMovement.MarkCollection:
 					RenderMovement(renderNodes, tokenSource);
 					break;
 			}
@@ -534,6 +539,10 @@ namespace VixenModules.Effect.Wipe
 		{
 			double previousMovement = 2.0;
 			TimeSpan startTime = TimeSpan.Zero;
+			double startLabel = 0;
+			double endLabel = 0;
+			TimeSpan startTime1 = StartTime;
+			TimeSpan endTime1 = StartTime;
 			TimeSpan timeInterval = TimeSpan.FromMilliseconds(_timeInterval);
 			int intervals = Convert.ToInt32(Math.Ceiling(TimeSpan.TotalMilliseconds / _timeInterval));
 			int burst = Direction != WipeDirection.DiagonalUp ? 0 : _pulsePercent - 1;
@@ -550,19 +559,47 @@ namespace VixenModules.Effect.Wipe
 				double position = (double) 100 / intervals * i;
 				
 				double movement = 0;
-				if (WipeMovement == WipeMovement.Audio)
+				switch (WipeMovement)
 				{
-					var currentValue = _audioUtilities.VolumeAtTime(i * Spacing);
-					if (currentValue > ((double) Sensitivity / 10))
+					case WipeMovement.Audio:
 					{
-						movement = ReverseDirection
-							? 1 + ScaleCurveToValue(currentValue, 1, 0) * 10
-							: -ScaleCurveToValue(currentValue, 1, 0) * 10;
+						var currentValue = _audioUtilities.VolumeAtTime(i * _timeInterval);
+						if (currentValue > ((double) Sensitivity / 10))
+						{
+							movement = ReverseDirection
+								? 1 + ScaleCurveToValue(currentValue, 1, 0) * 10
+								: -ScaleCurveToValue(currentValue, 1, 0) * 10;
+						}
+
+						break;
 					}
-				}
-				else
-				{
-					movement = MovementCurve.GetValue(position) / 100;
+					case WipeMovement.MarkCollection:
+					{
+						SetupMarks();
+						if (_marks != null)
+						{
+							foreach (var mark in _marks)
+							{
+								if (StartTime + TimeSpan.FromMilliseconds(i * _timeInterval) < mark.StartTime)
+								{
+									endTime1 = mark.StartTime;
+									double.TryParse(mark.Text, out endLabel);
+									break;
+								}
+
+								startTime1 = mark.StartTime;
+								double.TryParse(mark.Text, out startLabel);
+								}
+
+							movement = (i * _timeInterval - (startTime1 - StartTime).TotalMilliseconds) * ((endLabel - startLabel) / (endTime1 - startTime1).TotalMilliseconds) /
+							           100 + startLabel / 100;
+						}
+
+						break;
+					}
+					default:
+						movement = MovementCurve.GetValue(position) / 100;
+						break;
 				}
 
 				if (previousMovement != movement)
@@ -649,12 +686,46 @@ namespace VixenModules.Effect.Wipe
 				}
 		}
 
+		private void SetupMarks()
+		{
+			IMarkCollection mc = MarkCollections.FirstOrDefault(x => x.Id == _data.MarkCollectionId);
+			_marks = mc?.MarksInclusiveOfTime(StartTime, StartTime + TimeSpan);
+		}
+
+		/// <inheritdoc />
+		protected override void MarkCollectionsChanged()
+		{
+			if (WipeMovement == WipeMovement.MarkCollection)
+			{
+				var markCollection = MarkCollections.FirstOrDefault(x => x.Name.Equals(MarkCollectionId));
+				InitializeMarkCollectionListeners(markCollection);
+			}
+		}
+
+		/// <inheritdoc />
+		protected override void MarkCollectionsRemoved(IList<IMarkCollection> addedCollections)
+		{
+			var mc = addedCollections.FirstOrDefault(x => x.Id == _data.MarkCollectionId);
+			if (mc != null)
+			{
+				//Our collection is gone!!!!
+				RemoveMarkCollectionListeners(mc);
+				MarkCollectionId = String.Empty;
+			}
+		}
+
 		private class WipeClass
 		{
 			public int ElementIndex;
 			public TimeSpan StartTime;
 			public TimeSpan Duration;
 			public int ReverseColorDirection;
+		}
+
+		public class WipeAudioClass
+		{
+			public int X;
+			public int Y;
 		}
 
 		protected override EffectIntents _Render()
@@ -906,6 +977,35 @@ namespace VixenModules.Effect.Wipe
 		}
 
 		[Value]
+		[ProviderCategory(@"Type", 1)]
+		[ProviderDisplayName(@"Mark Collection")]
+		[ProviderDescription(@"Mark Collection that has the explosions align to.")]
+		[TypeConverter(typeof(IMarkCollectionNameConverter))]
+		[PropertyEditor("SelectionEditor")]
+		[PropertyOrder(2)]
+		public string MarkCollectionId
+		{
+			get
+			{
+				return MarkCollections.FirstOrDefault(x => x.Id == _data.MarkCollectionId)?.Name;
+			}
+			set
+			{
+				var newMarkCollection = MarkCollections.FirstOrDefault(x => x.Name.Equals(value));
+				var id = newMarkCollection?.Id ?? Guid.Empty;
+				if (!id.Equals(_data.MarkCollectionId))
+				{
+					var oldMarkCollection = MarkCollections.FirstOrDefault(x => x.Id.Equals(_data.MarkCollectionId));
+					RemoveMarkCollectionListeners(oldMarkCollection);
+					_data.MarkCollectionId = id;
+					AddMarkCollectionListeners(newMarkCollection);
+					IsDirty = true;
+					OnPropertyChanged();
+				}
+			}
+		}
+
+		[Value]
 		[ProviderCategory(@"Type",1)]
 		[ProviderDisplayName(@"WipeCount")]
 		[ProviderDescription(@"WipeCount")]
@@ -1153,7 +1253,7 @@ namespace VixenModules.Effect.Wipe
 
 		private void UpdateAttributes()
 		{
-			Dictionary<string, bool> propertyStates = new Dictionary<string, bool>(9)
+			Dictionary<string, bool> propertyStates = new Dictionary<string, bool>(14)
 			{
 				{"PassCount", WipeMovement == WipeMovement.Count},
 				{"PulsePercent", WipeMovement != WipeMovement.PulseLength},
@@ -1167,8 +1267,9 @@ namespace VixenModules.Effect.Wipe
 				{"ColorAcrossItemPerCount", ColorHandling == ColorHandling.ColorAcrossItems && WipeMovement != WipeMovement.Movement},
 				{"ReverseColorDirection", WipeMovement == WipeMovement.Movement},
 				{"YOffset", Direction > (WipeDirection) 3},
-				{"XOffset",  Direction > (WipeDirection) 3}
-			};
+				{"XOffset",  Direction > (WipeDirection) 3},
+				{"MarkCollectionId", WipeMovement == WipeMovement.MarkCollection}
+		};
 			SetBrowsable(propertyStates);
 		}
 

@@ -12,6 +12,8 @@ namespace VixenModules.Effect.Wipe
 		[Description("Movement")]
 		Movement,
 		[Description("Audio")]
-		Audio
+		Audio,
+		[Description("Mark Collection")]
+		MarkCollection
 	}
 }
