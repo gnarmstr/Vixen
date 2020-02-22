@@ -726,7 +726,7 @@ namespace VixenModules.Effect.CountDown
 
 					// Drawing the spinner swipe needs to be done before the transformation below otherwise the 
 					// swipe gradient will not fit the matrix and gets repeated
-					DrawFilmSpinnerSwipe(graphics, bufferWi, bufferHt, movementXOffset, movementYOffset, frame, textAngle, filmSpinnerRadialLineAngleInDegrees);
+					//DrawFilmSpinnerSwipe(graphics, bufferWi, bufferHt, movementXOffset, movementYOffset, frame, textAngle, filmSpinnerRadialLineAngleInDegrees);
 				}
 
 				//Rotate the text based off the angle setting

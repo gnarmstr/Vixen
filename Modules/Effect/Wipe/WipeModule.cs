@@ -248,19 +248,29 @@ namespace VixenModules.Effect.Wipe
 		{
 			List<Tuple<int, IElementNode[]>> groups = new List<Tuple<int, IElementNode[]>>();
 			_steps = (int)(Math.Sqrt(Math.Pow(_bufferWidth, 2) + Math.Pow(_bufferHeight, 2))*1.41);
+			double offset = _steps / 1.41;
 			_pulsePercent = (int)(_bufferWidth * (PulsePercent / 100));
 			if (WipeMovement >= WipeMovement.Movement) _steps += _pulsePercent;
 
 			for (int i = 0; i <= _steps; i++)
 			{
+				double position = (double)100 / _steps * i;
+				double sizeCurve;
+				double positionCurve;
+				sizeCurve = WipeWidthCurve.GetValue(position) / 100 * (_steps / 2);
+				positionCurve = ScaleCurveToValue(WipePositionCurve.GetValue(position), -((offset + sizeCurve) * ((double)_maxX / _maxY)), offset + sizeCurve);
 				List<IElementNode> elements = new List<IElementNode>();
 				foreach (Tuple<IElementNode, int, int, int> node in renderedNodes)
 				{
-					if (ReverseDirection || WipeMovement >= WipeMovement.Movement)
+					if (ReverseDirection )//|| WipeMovement >= WipeMovement.Movement)
 					{
 						if (Direction == WipeDirection.DiagonalUp)
 						{
-							if (node.Item2 - _minX + node.Item3 - _minY == _steps - i) elements.Add(node.Item1);
+							//_bufferHeight - (node.Item3 - _minY) == i && node.Item2 - _minX > positionCurve - (int)sizeCurve && node.Item2 - _minX < positionCurve + (int)sizeCurve)
+							if (node.Item2 - _minX + node.Item3 - _minY == _steps - i && (node.Item3 - _minY) - (node.Item2 - _minX) > positionCurve - (int)sizeCurve && (node.Item3 - _minY) - (node.Item2 - _minX) < positionCurve + (int)sizeCurve)
+							{
+								elements.Add(node.Item1);
+							}
 						}
 						else
 						{
@@ -310,21 +320,34 @@ namespace VixenModules.Effect.Wipe
 			
 			for (int i = 0; i <= _steps; i++)
 			{
+				double position = (double)100 / _steps * i;
+				double sizeCurve;
+				double positionCurve;
 				List<IElementNode> elements = new List<IElementNode>();
 				switch (Direction)
 				{
 					case WipeDirection.Vertical:
+						sizeCurve = WipeWidthCurve.GetValue(position) / 100 * _bufferWidth / 2;
+						positionCurve = ScaleCurveToValue(WipePositionCurve.GetValue(position), _bufferWidth + sizeCurve, -sizeCurve);
 						foreach (Tuple<IElementNode, int, int, int> node in renderedNodes)
 						{
-							if (_bufferHeight - (node.Item3 - _minY) == i) elements.Add(node.Item1);
+							if (_bufferHeight - (node.Item3 - _minY) == i && node.Item2 - _minX > positionCurve - (int)sizeCurve && node.Item2 - _minX < positionCurve + (int)sizeCurve)
+							{
+								elements.Add(node.Item1);
+							}
 						}
 
 						break;
 
 					case WipeDirection.Horizontal:
+						sizeCurve = WipeWidthCurve.GetValue(position) / 100 * _bufferHeight / 2;
+						positionCurve = ScaleCurveToValue(WipePositionCurve.GetValue(position), -sizeCurve, _bufferHeight + sizeCurve);
 						foreach (Tuple<IElementNode, int, int, int> node in renderedNodes)
 						{
-							if (_bufferWidth - (node.Item2 - _minX) == i) elements.Add(node.Item1);
+							if (_bufferWidth - (node.Item2 - _minX) == i && node.Item3 - _minY > positionCurve - (int)sizeCurve && node.Item3 - _minY < positionCurve + (int)sizeCurve)
+							{
+								elements.Add(node.Item1);
+							}
 						}
 
 						break;
@@ -332,7 +355,7 @@ namespace VixenModules.Effect.Wipe
 				groups.Add(new Tuple<int, IElementNode[]>(i, elements.ToArray()));
 			}
 
-			return ReverseDirection || WipeMovement >= WipeMovement.Movement
+			return ReverseDirection //|| WipeMovement >= WipeMovement.Movement
 				? groups.OrderBy(o => o.Item1).Select(s => s.Item2).ToList()
 				: groups.OrderByDescending(o => o.Item1).Select(s => s.Item2).ToList();
 		}
@@ -578,21 +601,30 @@ namespace VixenModules.Effect.Wipe
 						SetupMarks();
 						if (_marks != null)
 						{
+							bool endMark = true;
 							foreach (var mark in _marks)
 							{
 								if (StartTime + TimeSpan.FromMilliseconds(i * _timeInterval) < mark.StartTime)
 								{
 									endTime1 = mark.StartTime;
 									double.TryParse(mark.Text, out endLabel);
+									endMark = false;
 									break;
 								}
 
 								startTime1 = mark.StartTime;
 								double.TryParse(mark.Text, out startLabel);
-								}
+							}
+
+							if (endMark)
+							{
+								endTime1 = StartTime + TimeSpan;
+								endLabel = 0;
+							}
 
 							movement = (i * _timeInterval - (startTime1 - StartTime).TotalMilliseconds) * ((endLabel - startLabel) / (endTime1 - startTime1).TotalMilliseconds) /
 							           100 + startLabel / 100;
+							//if (Double.IsNaN(movement)) movement = 0;
 						}
 
 						break;
@@ -854,15 +886,15 @@ namespace VixenModules.Effect.Wipe
 
 		[Value]
 		[ProviderCategory(@"Direction", 2)]
-		[ProviderDisplayName(@"ReverseDirection")]
-		[ProviderDescription(@"ReverseDirection")]
+		[ProviderDisplayName(@"Movement")]
+		[ProviderDescription(@"Movement")]
 		[PropertyOrder(1)]
-		public bool ReverseDirection
+		public Curve MovementCurve
 		{
-			get { return _data.ReverseDirection; }
+			get { return _data.MovementCurve; }
 			set
 			{
-				_data.ReverseDirection = value;
+				_data.MovementCurve = value;
 				IsDirty = true;
 				OnPropertyChanged();
 				UpdateAttributes();
@@ -873,15 +905,15 @@ namespace VixenModules.Effect.Wipe
 
 		[Value]
 		[ProviderCategory(@"Direction", 2)]
-		[ProviderDisplayName(@"Movement")]
-		[ProviderDescription(@"Movement")]
+		[ProviderDisplayName(@"ReverseDirection")]
+		[ProviderDescription(@"ReverseDirection")]
 		[PropertyOrder(2)]
-		public Curve MovementCurve
+		public bool ReverseDirection
 		{
-			get { return _data.MovementCurve; }
+			get { return _data.ReverseDirection; }
 			set
 			{
-				_data.MovementCurve = value;
+				_data.ReverseDirection = value;
 				IsDirty = true;
 				OnPropertyChanged();
 				UpdateAttributes();
@@ -945,6 +977,7 @@ namespace VixenModules.Effect.Wipe
 		[ProviderCategory(@"Pulse",6)]
 		[ProviderDisplayName(@"PulseDuration")]
 		[ProviderDescription(@"PulseDuration")]
+		[PropertyOrder(0)]
 		public int PulseTime
 		{
 			get { return _data.PulseTime; }
@@ -953,6 +986,44 @@ namespace VixenModules.Effect.Wipe
 				_data.PulseTime = value;
 				IsDirty = true;
 				OnPropertyChanged();
+			}
+		}
+
+		[Value]
+		[ProviderCategory(@"Pulse", 3)]
+		[ProviderDisplayName(@"Width")]
+		[ProviderDescription(@"Width")]
+		[PropertyOrder(1)]
+		public Curve WipeWidthCurve
+		{
+			get { return _data.WipeWidthCurve; }
+			set
+			{
+				_data.WipeWidthCurve = value;
+				IsDirty = true;
+				OnPropertyChanged();
+				//UpdateAttributes();
+				TypeDescriptor.Refresh(this);
+
+			}
+		}
+
+		[Value]
+		[ProviderCategory(@"Pulse", 3)]
+		[ProviderDisplayName(@"Position")]
+		[ProviderDescription(@"Position")]
+		[PropertyOrder(2)]
+		public Curve WipePositionCurve
+		{
+			get { return _data.WipePositionCurve; }
+			set
+			{
+				_data.WipePositionCurve = value;
+				IsDirty = true;
+				OnPropertyChanged();
+				//UpdateAttributes();
+				TypeDescriptor.Refresh(this);
+
 			}
 		}
 
@@ -1263,7 +1334,7 @@ namespace VixenModules.Effect.Wipe
 				{"ColorHandling", WipeMovement != WipeMovement.Movement},
 				{"WipeMovementDirection", WipeMovement == WipeMovement.Movement },
 				{"MovementCurve", WipeMovement == WipeMovement.Movement },
-				{"ReverseDirection", WipeMovement != WipeMovement.Movement },
+				//{"ReverseDirection", WipeMovement != WipeMovement.Movement && WipeMovement != WipeMovement.MarkCollection},
 				{"ColorAcrossItemPerCount", ColorHandling == ColorHandling.ColorAcrossItems && WipeMovement != WipeMovement.Movement},
 				{"ReverseColorDirection", WipeMovement == WipeMovement.Movement},
 				{"YOffset", Direction > (WipeDirection) 3},
@@ -1271,6 +1342,7 @@ namespace VixenModules.Effect.Wipe
 				{"MarkCollectionId", WipeMovement == WipeMovement.MarkCollection}
 		};
 			SetBrowsable(propertyStates);
+			UpdateAudioAttributes();
 		}
 
 		private void UpdateAudioAttributes(bool refresh = true)
@@ -1299,8 +1371,8 @@ namespace VixenModules.Effect.Wipe
 		{
 			Dictionary<string, bool> propertyStates = new Dictionary<string, bool>(2)
 			{
-				{"LowPassFreq", LowPass},
-				{"HighPassFreq", HighPass}
+				{"LowPassFreq", LowPass && WipeMovement == WipeMovement.Audio},
+				{"HighPassFreq", HighPass && WipeMovement == WipeMovement.Audio}
 			};
 			SetBrowsable(propertyStates);
 			if (refresh)

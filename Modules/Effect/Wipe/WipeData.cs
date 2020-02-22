@@ -18,6 +18,8 @@ namespace VixenModules.Effect.Wipe {
 			PassCount = 1;
 			PulsePercent = 33;
 			MovementCurve = new Curve(new PointPairList(new[] { 0.0, 100.0 }, new[] { 0.0, 100.0 }));
+			WipeWidthCurve = new Curve(new PointPairList(new[] { 0.0, 100.0 }, new[] { 0.0, 100.0 }));
+			WipePositionCurve = new Curve(new PointPairList(new[] { 0.0, 100.0 }, new[] { 0.0, 100.0 }));
 			WipeMovement = WipeMovement.Count;
 			ReverseDirection = false;
 			ColorHandling = ColorHandling.GradientThroughWholeEffect;
@@ -85,6 +87,12 @@ namespace VixenModules.Effect.Wipe {
 
 		[DataMember]
 		public double YOffset { get; set; }
+
+		[DataMember]
+		public Curve WipeWidthCurve { get; set; }
+
+		[DataMember]
+		public Curve WipePositionCurve { get; set; }
 
 		[DataMember]
 		public int DecayTime { get; set; }
